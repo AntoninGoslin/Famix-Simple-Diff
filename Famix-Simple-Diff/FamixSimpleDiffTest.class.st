@@ -32,6 +32,22 @@ FamixSimpleDiffTest >> testClassesWithDifferentNamesAreNotEqual [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testClassesWithDifferentSuperclassesAreNotEqual [
+
+	| sd entity1 entity2 newInheritance |
+	sd := FamixSimpleDiff new.
+	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
+	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass'.
+	
+	newInheritance := mainModel2 newInheritance
+		superclass: entity2;
+		subclass: entity2.
+	entity2 superInheritances: { newInheritance }. 
+	
+	self assert: (sd compareEntity: entity1 to: entity2) equals: false
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCorrespondingClassesAreEqual [
 
 	| sd entity1 entity2 path |

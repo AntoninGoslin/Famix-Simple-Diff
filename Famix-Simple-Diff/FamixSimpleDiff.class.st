@@ -8,19 +8,23 @@ Class {
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
-	| properties equalProperties |
-	aFamixEntity class = otherFamixEntity class ifFalse: [ 
-		self halt. ^ false ].
+	| properties relations |
+	aFamixEntity class = otherFamixEntity class ifFalse: [ ^ false ].
 
 	properties := aFamixEntity class allSlots select: [ :slot |
 		              slot class = FMProperty ].
-	equalProperties := properties allSatisfy: [ :p |
-		|eq |
-		  eq := (p read: aFamixEntity) = (p read: otherFamixEntity).
-			self haltIf: [ eq = false ].
-		eq ].
+	properties do: [ :p |
+			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
+				^ false ] ].
 
-	^ equalProperties
+	relations := aFamixEntity class allSlots select: [ :slot |
+		             slot isFMRelationSlot ].
+
+	relations do: [ :r |
+			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
+				ifFalse: [ ^ false ] ].
+
+	^ true
 ]
 
 { #category : 'as yet unclassified' }
@@ -35,6 +39,47 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 				ifFalse: [ ^ false ] ].
 
 	^ true
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
+
+	| val1 val2 |
+	val1 := aFMRelationSlot read: aFamixEntity.
+	val2 := aFMRelationSlot read: otherFamixEntity.
+
+	"Sometimes, parent relations are duplicated and are nil.
+	This guards for that..."
+	val1 == val2 ifTrue: [ ^ true ].
+
+	aFMRelationSlot isToOne
+		ifTrue: [ ^ (self pathOfEntity: val1) = (self pathOfEntity: val1) ]
+		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
+				val1 size = val2 size ifFalse: [ ^ false ].
+				val1 := val1
+					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
+					        as: Bag.
+				val2 := val2
+					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
+					        as: Bag.
+				^ val1 = val2 ]
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> computePathOfEntity: anEntity [
+
+	"We only work for single parent entities... And we hope this is the case always.
+	If not, talk to Guille, he has a point.
+	Read about lexical definition"
+	self assert: anEntity containers size <= 1.
+	
+	"If we have a container, we continue recursively"
+	anEntity containersDo: [ :c |
+		^ (self pathOfEntity: c) copyWith: ((self sortedChildren: c) indexOf: anEntity)
+	].
+	
+	"We don't have a container, this is the root. Return the index of this entity in the root collection"
+	^ { (self entityRoots: anEntity mooseModel) indexOf: anEntity }
 ]
 
 { #category : 'as yet unclassified' }
@@ -73,18 +118,26 @@ FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> pathOfEntity: anEntity [
 
-	"We only work for single parent entities... And we hope this is the case always.
-	If not, talk to Guille, he has a point.
-	Read about lexical definition"
-	self assert: anEntity containers size <= 1.
-	
-	"If we have a container, we continue recursively"
-	anEntity containersDo: [ :c |
-		^ (self pathOfEntity: c) copyWith: ((self sortedChildren: c) indexOf: anEntity)
-	].
-	
-	"We don't have a container, this is the root. Return the index of this entity in the root collection"
-	^ { (self entityRoots: anEntity mooseModel) indexOf: anEntity }
+	^ anEntity
+		  cacheAt: #path
+		  ifAbsentPut: [ self computePathOfEntity: anEntity ]
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionOrSmellingThing [
+
+	| target targettedEntities |
+	target := multiRelationTargetOrCollectionOrSmellingThing isAssociation
+		          ifTrue: [ multiRelationTargetOrCollectionOrSmellingThing target ]
+		          ifFalse: [ multiRelationTargetOrCollectionOrSmellingThing ].
+
+	targettedEntities := target isCollection
+		                     ifTrue: [ target ]
+		                     ifFalse: [ { target } ].
+
+	^ targettedEntities collect: [ :e |
+		"Please e be an entity please please plz"
+		  self pathOfEntity: e ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -102,8 +155,10 @@ FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 ]
 
 { #category : 'as yet unclassified' }
-FamixSimpleDiff >> sortedChildren: entity [ 
-	
-	^ (entity containedEntities select: [ :e | e isStub not ])
-		 sorted: [ :a :b | a fullDisplayString < b fullDisplayString ]
+FamixSimpleDiff >> sortedChildren: entity [
+
+	^ entity cacheAt: #sortedChildren ifAbsentPut: [
+			  (entity containedEntities select: [ :e | e isStub not ]) sorted: [
+				  :a
+				  :b | a fullDisplayString < b fullDisplayString ] ]
 ]
