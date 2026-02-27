@@ -1,0 +1,109 @@
+Class {
+	#name : 'FamixSimpleDiff',
+	#superclass : 'Object',
+	#category : 'Famix-Simple-Diff',
+	#package : 'Famix-Simple-Diff'
+}
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
+
+	| properties equalProperties |
+	aFamixEntity class = otherFamixEntity class ifFalse: [ 
+		self halt. ^ false ].
+
+	properties := aFamixEntity class allSlots select: [ :slot |
+		              slot class = FMProperty ].
+	equalProperties := properties allSatisfy: [ :p |
+		|eq |
+		  eq := (p read: aFamixEntity) = (p read: otherFamixEntity).
+			self haltIf: [ eq = false ].
+		eq ].
+
+	^ equalProperties
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
+
+	(self entityRoots: aFamixJavaModel) do: [ :root |
+			| correspondingRoot |
+			correspondingRoot := self
+				                     correspondingEntityTo: root
+				                     in: aFamixJavaModel2.
+			(self recursiveCompareEntity: root with: correspondingRoot)
+				ifFalse: [ ^ false ] ].
+
+	^ true
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> correspondingEntityTo: entity in: model [
+
+	| path |
+	path := self pathOfEntity: entity.
+	^ self entityAtPath: path inModel: model
+	
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
+
+	indexPath ifEmpty: [ ^ entity ].
+
+	^ self
+		  entityAtPath: indexPath allButFirst
+		  fromEntity: ((self sortedChildren: entity) at: indexPath first)
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
+
+	| rootEntity |
+	rootEntity := (self entityRoots: model) at: indexPath first.
+	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> entityRoots: aFamixJavaModel [ 
+	
+	^ aFamixJavaModel rootEntities sorted: [ :a :b | a fullDisplayString < b fullDisplayString ]
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> pathOfEntity: anEntity [
+
+	"We only work for single parent entities... And we hope this is the case always.
+	If not, talk to Guille, he has a point.
+	Read about lexical definition"
+	self assert: anEntity containers size <= 1.
+	
+	"If we have a container, we continue recursively"
+	anEntity containersDo: [ :c |
+		^ (self pathOfEntity: c) copyWith: ((self sortedChildren: c) indexOf: anEntity)
+	].
+	
+	"We don't have a container, this is the root. Return the index of this entity in the root collection"
+	^ { (self entityRoots: anEntity mooseModel) indexOf: anEntity }
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
+
+	(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
+
+	(self sortedChildren: entity1)
+		with: (self sortedChildren: entity2)
+		do: [ :child1 :child2 |
+			(self recursiveCompareEntity: child1 with: child2) ifFalse: [
+				^ false ] ].
+
+	^ true
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> sortedChildren: entity [ 
+	
+	^ (entity containedEntities select: [ :e | e isStub not ])
+		 sorted: [ :a :b | a fullDisplayString < b fullDisplayString ]
+]
