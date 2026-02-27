@@ -1,0 +1,2 @@
+# Famix-Simple-Diff
+Simple implementation to compare two models and return whether they are identical or not.
