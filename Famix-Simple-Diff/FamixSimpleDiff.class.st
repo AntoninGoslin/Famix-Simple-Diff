@@ -1,6 +1,10 @@
 Class {
 	#name : 'FamixSimpleDiff',
 	#superclass : 'Object',
+	#instVars : [
+		'roots',
+		'childrenCache'
+	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
@@ -9,20 +13,20 @@ Class {
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	| properties relations |
-	aFamixEntity class = otherFamixEntity class ifFalse: [ ^ false ].
+	aFamixEntity class = otherFamixEntity class ifFalse: [ 1halt. ^ false ].
 
 	properties := aFamixEntity class allSlots select: [ :slot |
 		              slot class = FMProperty ].
 	properties do: [ :p |
 			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
-				^ false ] ].
+				1halt. ^ false ] ].
 
 	relations := aFamixEntity class allSlots select: [ :slot |
 		             slot isFMRelationSlot ].
 
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
-				ifFalse: [ ^ false ] ].
+				ifFalse: [ 1halt. ^ false ] ].
 
 	^ true
 ]
@@ -44,7 +48,11 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
 
-	| val1 val2 |
+	| classesToIgnore val1 val2 |
+	"just skip those cases"
+	classesToIgnore := { FamixTAnnotationInstance }.
+	(classesToIgnore includes: aFMRelationSlot targetClass) ifTrue: [ ^ true ].
+	
 	val1 := aFMRelationSlot read: aFamixEntity.
 	val2 := aFMRelationSlot read: otherFamixEntity.
 
@@ -71,10 +79,10 @@ FamixSimpleDiff >> computePathOfEntity: anEntity [
 	"We only work for single parent entities... And we hope this is the case always.
 	If not, talk to Guille, he has a point.
 	Read about lexical definition"
-	self assert: anEntity containers size <= 1.
+	self assert: anEntity containers asSet size <= 1.
 	
 	"If we have a container, we continue recursively"
-	anEntity containersDo: [ :c |
+	anEntity containers asSet do: [ :c |
 		^ (self pathOfEntity: c) copyWith: ((self sortedChildren: c) indexOf: anEntity)
 	].
 	
@@ -110,9 +118,20 @@ FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 ]
 
 { #category : 'as yet unclassified' }
-FamixSimpleDiff >> entityRoots: aFamixJavaModel [ 
+FamixSimpleDiff >> entityRoots: aFamixJavaModel [
+
+	^ (roots ifNil: [ roots := Dictionary new ])
+		  at: aFamixJavaModel
+		  ifAbsentPut: [
+				  (aFamixJavaModel rootEntities select: [ :e | e isStub not ])
+					  sorted: [ :a :b | a fullDisplayString < b fullDisplayString ] ]
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> initialize [
 	
-	^ aFamixJavaModel rootEntities sorted: [ :a :b | a fullDisplayString < b fullDisplayString ]
+	super initialize.
+	childrenCache := LRUCache new maximumWeight: 100
 ]
 
 { #category : 'as yet unclassified' }
@@ -157,7 +176,7 @@ FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> sortedChildren: entity [
 
-	^ entity cacheAt: #sortedChildren ifAbsentPut: [
+	^ childrenCache at: entity ifAbsentPut: [
 			  (entity containedEntities select: [ :e | e isStub not ]) sorted: [
 				  :a
 				  :b | a fullDisplayString < b fullDisplayString ] ]
