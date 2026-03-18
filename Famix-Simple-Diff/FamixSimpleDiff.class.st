@@ -15,19 +15,21 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	| properties relations |
 	aFamixEntity class = otherFamixEntity class ifFalse: [ 1halt. ^ false ].
 
+	"Comparing properties (slots with non-famix values)"
 	properties := aFamixEntity class allSlots select: [ :slot |
 		              slot class = FMProperty ].
 	properties do: [ :p |
 			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
 				1halt. ^ false ] ].
 
+	"Comparing relations (slots with famix values)"
 	relations := aFamixEntity class allSlots select: [ :slot |
 		             slot isFMRelationSlot ].
-
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
 				ifFalse: [ 1halt. ^ false ] ].
 
+	"Every slot value is equal, the entities are identical"
 	^ true
 ]
 
@@ -53,21 +55,56 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	classesToIgnore := {
 		                   FamixTAnnotationInstance.
 		                   FamixTSourceAnchor.
-		                   FamixTEntityTyping }.
+		                   FamixTEntityTyping.
+		                   FamixTConcretization }.
 	(classesToIgnore includes: aFMRelationSlot targetClass) ifTrue: [
 		^ true ].
-
-	sortBlock := [ :a :b | a fullDisplayString < b fullDisplayString ].
 
 	aFMRelationSlot isToOne
 		ifTrue: [
 				val1 := aFMRelationSlot read: aFamixEntity.
 				val2 := aFMRelationSlot read: otherFamixEntity ]
 		ifFalse: [
-				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection
-					        sorted: sortBlock.
+				| rejectBlock |
+				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection.
 				val2 := (aFMRelationSlot read: otherFamixEntity)
-					        asOrderedCollection sorted: sortBlock ].
+					        asOrderedCollection.
+
+				sortBlock := val1
+					             ifEmpty: [ self sortBlock ]
+					             ifNotEmpty: [ self sortBlockFor: val1 anyOne ].
+
+				"Rejecting everything linked to parametrics in invocation context"
+				(aFMRelationSlot name endsWith: 'Invocations') ifTrue: [
+						val1 := val1 reject: [ :e |
+								        e class = FamixJavaParametricInvocation or: [
+									        e sender class = FamixJavaParametricMethod ] ].
+						val2 := val2 reject: [ :e |
+								        e class = FamixJavaParametricInvocation or: [
+									        e sender class = FamixJavaParametricMethod ] ] ].
+
+				"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
+				aFMRelationSlot name = 'methods' ifTrue: [
+						val1 := val1 reject: [ :e | e name = 'clone' ].
+						val2 := val2 reject: [ :e | e name = 'clone' ] ].
+
+				"Rejecting again stuff linked to the parametrics..."
+				rejectBlock := [ :e |
+					               | target |
+					               e isAssociation
+						               ifTrue: [
+								               e target isCollection
+									               ifTrue: [ target := e target anyOne ]
+									               ifFalse: [ target := e target ] ]
+						               ifFalse: [ target := e ].
+					               target allContainers anySatisfy: [ :e |
+						               e isParametricEntity ] ].
+
+				val1 := val1 reject: rejectBlock.
+				val2 := val2 reject: rejectBlock.
+
+				val1 := val1 sorted: sortBlock.
+				val2 := val2 sorted: sortBlock ].
 
 	"Sometimes, parent relations are duplicated and are nil.
 	This guards for that..."
@@ -83,6 +120,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 				val2 := val2
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
+
 				^ val1 = val2 ]
 ]
 
@@ -93,12 +131,9 @@ FamixSimpleDiff >> computePathOfEntity: anEntity [
 	Read about lexical definition"
 
 	self assert: anEntity containers asSet size <= 1.
-
-	1 haltIf: [ anEntity name = 'AccessibleRole' ].
 	
 	"If we have a container, we continue recursively"
 	anEntity containers asSet do: [ :c |
-			"1 haltIf: [ c mooseModel ~= (self sortedChildren: c) anyOne mooseModel ]."
 			^ (self pathOfEntity: c) copyWith:
 				  ((self sortedChildren: c) indexOf: anEntity) ].
 
@@ -136,44 +171,21 @@ FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 
-	| uglySortBlock goodSortBlock classToReject |
-	uglySortBlock := [ :a :b |
-		                 | valA valB |
-		                 valA := String streamContents: [ :s | a printOn: s ].
-		                 valB := String streamContents: [ :s | b printOn: s ].
-		                 valA = valB
-			                 ifTrue: [
-					                 a class = FamixJavaAnnotationInstance
-						                 ifTrue: [
-								                 a annotatedEntity sourceAnchor
-									                 ifNotNil: [
-											                 b annotatedEntity sourceAnchor
-												                 ifNotNil: [
-														                 a annotatedEntity sourceAnchor startPos
-														                 <
-														                 b annotatedEntity sourceAnchor startPos ]
-												                 ifNil: [ 1 halt ] ]
-									                 ifNil: [ 1 halt ] ]
-						                 ifFalse: [ 1 halt ] ]
-			                 ifFalse: [ valA < valB ] ].
-
-	goodSortBlock := [ :a :b |
-		                 | valA valB |
-		                 valA := String streamContents: [ :s | a printOn: s ].
-		                 valB := String streamContents: [ :s | b printOn: s ].
-		                 valA < valB ].
-
-	classToReject := {
-		                 FamixJavaAnnotationInstance.
-		                 FamixJavaAnnotationInstanceAttribute.
-		                 FamixJavaWildcard }.
+	| goodSortBlock classesToReject |
+	classesToReject := {
+		                   FamixJavaAnnotationInstance.
+		                   FamixJavaAnnotationInstanceAttribute.
+		                   FamixJavaWildcard }.
 
 	^ (roots ifNil: [ roots := Dictionary new ])
 		  at: aFamixJavaModel
 		  ifAbsentPut: [
-				  (aFamixJavaModel rootEntities reject: [ :e |
-					   e isStub or: [ classToReject includes: e class ] ]) sorted:
-					  goodSortBlock ]
+				  | rootEntities |
+				  rootEntities := aFamixJavaModel rootEntities reject: [ :e |
+					                  e isStub or: [
+						                  classesToReject includes: e class ] ].
+				  goodSortBlock := self sortBlockFor: rootEntities anyOne.
+				  rootEntities sorted: goodSortBlock ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -211,6 +223,16 @@ FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionO
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 
+	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
+	entity1 mooseName = entity2 mooseName ifTrue: [
+			(entity1 isParametricEntity and: [ entity2 isParametricEntity ])
+				ifTrue: [ ^ true ].
+			(entity1 isType and: [ entity1 isAnonymousClass ]) ifTrue: [
+				^ true ] ].
+
+	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
+	entity1 name = 'clone' ifTrue: [ ^ true ].
+
 	(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
 
 	(self sortedChildren: entity1)
@@ -220,6 +242,25 @@ FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 				^ false ] ].
 
 	^ true
+]
+
+{ #category : 'sorting' }
+FamixSimpleDiff >> sortBlock [
+
+	^ [ :a :b | a mooseName > b mooseName ]
+]
+
+{ #category : 'sorting' }
+FamixSimpleDiff >> sortBlockFor: anEntity [
+
+	^ anEntity hasUniqueMooseNameInModel
+		  ifTrue: [ [ :a :b | a mooseName < b mooseName ] ]
+		  ifFalse: [
+				  [ :a :b |
+					  | valA valB |
+					  valA := String streamContents: [ :s | a printOn: s ].
+					  valB := String streamContents: [ :s | b printOn: s ].
+					  valA < valB ] ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -242,6 +283,7 @@ FamixSimpleDiff >> sortedChildren: entity [
 												       ifNil: [ 1 halt ] ]
 									       ifNil: [ 1 halt ] ]
 						       ifFalse: [ valA < valB ] ] ].
+
 
 	^ res
 ]
