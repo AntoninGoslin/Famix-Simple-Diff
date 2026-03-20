@@ -14,6 +14,5 @@ BaselineOfFamixSimpleDiff >> baseline: spec [
 	<baseline>
 	spec for: #common do: [
 		spec
-			package: 'Famix-Simple-Diff';
-			group: 'default' with: #( Famix-Simple-Diff ) ]
+			package: 'Famix-Simple-Diff' ]
 ]
