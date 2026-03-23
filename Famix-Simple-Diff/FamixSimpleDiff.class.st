@@ -74,31 +74,21 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 					             ifEmpty: [ self sortBlock ]
 					             ifNotEmpty: [ self sortBlockFor: val1 anyOne ].
 
-				"Rejecting everything linked to parametrics in invocation context"
-				(aFMRelationSlot name endsWith: 'Invocations') ifTrue: [
-						val1 := val1 reject: [ :e |
-								        e class = FamixJavaParametricInvocation or: [
-									        e sender class = FamixJavaParametricMethod ] ].
-						val2 := val2 reject: [ :e |
-								        e class = FamixJavaParametricInvocation or: [
-									        e sender class = FamixJavaParametricMethod ] ] ].
-
-				"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
-				aFMRelationSlot name = 'methods' ifTrue: [
-						val1 := val1 reject: [ :e | e name = 'clone' ].
-						val2 := val2 reject: [ :e | e name = 'clone' ] ].
-
-				"Rejecting again stuff linked to the parametrics..."
 				rejectBlock := [ :e |
 					               | target |
-					               e isAssociation
-						               ifTrue: [
-								               e target isCollection
-									               ifTrue: [ target := e target anyOne ]
-									               ifFalse: [ target := e target ] ]
-						               ifFalse: [ target := e ].
-					               target allContainers anySatisfy: [ :e |
-						               e isParametricEntity ] ].
+					               e name = 'clone' or: [
+							               e class = FamixJavaParametricInvocation or: [
+									               (e isInvocation and: [
+										                e source class = FamixJavaParametricMethod ])
+										               or: [
+												               e isAssociation
+													               ifTrue: [
+															               e target isCollection
+																               ifTrue: [ target := e target anyOne ]
+																               ifFalse: [ target := e target ] ]
+													               ifFalse: [ target := e ].
+												               target allContainers anySatisfy: [ :c |
+													               c isParametricEntity ] ] ] ] ].
 
 				val1 := val1 reject: rejectBlock.
 				val2 := val2 reject: rejectBlock.
