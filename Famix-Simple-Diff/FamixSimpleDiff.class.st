@@ -3,7 +3,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'roots',
-		'childrenCache'
+		'childrenCache',
+		'debug'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
@@ -13,21 +14,21 @@ Class {
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	| properties relations |
-	aFamixEntity class = otherFamixEntity class ifFalse: [ ^ false ].
+	aFamixEntity class = otherFamixEntity class ifFalse: [ ^ self fail ].
 
 	"Comparing properties (slots with non-famix values)"
 	properties := aFamixEntity class allSlots select: [ :slot |
 		              slot class = FMProperty ].
 	properties do: [ :p |
 			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
-				^ false ] ].
+				^ self fail ] ].
 
 	"Comparing relations (slots with famix values)"
 	relations := aFamixEntity class allSlots select: [ :slot |
 		             slot isFMRelationSlot ].
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
-				ifFalse: [ ^ false ] ].
+				ifFalse: [ ^ self fail ] ].
 
 	"Every slot value is equal, the entities are identical"
 	^ true
@@ -42,7 +43,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 				                     correspondingEntityTo: root
 				                     in: aFamixJavaModel2.
 			(self recursiveCompareEntity: root with: correspondingRoot)
-				ifFalse: [ ^ false ] ].
+				ifFalse: [ ^ self fail ] ].
 
 	^ true
 ]
@@ -103,7 +104,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	aFMRelationSlot isToOne
 		ifTrue: [ ^ (self pathOfEntity: val1) = (self pathOfEntity: val2) ]
 		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
-				val1 size = val2 size ifFalse: [ ^ false ].
+				val1 size = val2 size ifFalse: [ ^ self fail ].
 				val1 := val1
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
@@ -111,7 +112,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
 
-				^ val1 = val2 ]
+				val1 = val2 ifFalse: [ ^ self fail ] ifTrue: [ ^ true ] ]
 ]
 
 { #category : 'as yet unclassified' }
@@ -138,6 +139,12 @@ FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 	path := self pathOfEntity: entity.
 	^ self entityAtPath: path inModel: model
 	
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> debugOn [
+
+	debug := true
 ]
 
 { #category : 'as yet unclassified' }
@@ -179,9 +186,17 @@ FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 ]
 
 { #category : 'as yet unclassified' }
+FamixSimpleDiff >> fail [
+
+	debug ifTrue: [ self halt ].
+	^ false
+]
+
+{ #category : 'as yet unclassified' }
 FamixSimpleDiff >> initialize [
 	
 	super initialize.
+	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100
 ]
 
