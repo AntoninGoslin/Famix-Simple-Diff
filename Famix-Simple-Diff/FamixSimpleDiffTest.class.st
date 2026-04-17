@@ -191,3 +191,18 @@ FamixSimpleDiffTest >> testSameModelsAreEqual [
 	
 	self assert: (sd compareModel: mainModel1 to: mainModel1)
 ]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortBlockOrdersByName [
+
+	| sd block entity1 entity2 |
+	sd := FamixSimpleDiff new.
+	
+	block := sd sortBlock.
+	
+	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
+	entity2 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
+	
+	self assert: (block value: entity2 value: entity1).
+	self deny: (block value: entity1 value: entity2)
+]
