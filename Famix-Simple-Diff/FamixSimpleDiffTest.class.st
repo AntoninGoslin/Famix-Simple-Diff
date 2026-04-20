@@ -208,6 +208,29 @@ FamixSimpleDiffTest >> testSortBlockOrdersByName [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenFiltersStubsAndInitializers [
+	| sd parent normalMethod stubMethod initializeMethod res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and stubs methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	normalMethod := FamixJavaMethod new name: 'normalMethod'; 
+	isStub: false.
+	stubMethod  := FamixJavaMethod new name: 'stubMethod'; 
+	isStub: true.
+	initializeMethod := FamixJavaMethod new name: '<Initializer>';
+	isStub: false.
+	
+	"testing the sort"
+	parent methods: { normalMethod . stubMethod . initializeMethod }.
+	res := sd sortedChildren: parent.
+	
+	"the filter keep just 1 method"
+	self assert: res size equals: 1.
+	self assert: res first equals: normalMethod .
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName [
 	| sd parent aBeginMethod bBeginMethod res |
 	sd := FamixSimpleDiff new.
