@@ -208,6 +208,23 @@ FamixSimpleDiffTest >> testSortBlockOrdersByName [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName [
+	| sd parent aBeginMethod bBeginMethod res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and child methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	aBeginMethod := FamixJavaMethod new name: 'aBeginMethod'.
+	bBeginMethod := FamixJavaMethod new name: 'bBeginMethod'.
+	
+	"testing the sort"
+	parent methods: { bBeginMethod . aBeginMethod}.
+	res := sd sortedChildren: parent. 
+	self assert: res first equals: aBeginMethod.
+	self assert: res second equals: bBeginMethod.
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenSameName [
 	| sd parent method1 method2 anchor1 anchor2 res |
 	sd := FamixSimpleDiff new.
