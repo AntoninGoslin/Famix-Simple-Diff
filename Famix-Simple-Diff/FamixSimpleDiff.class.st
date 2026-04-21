@@ -24,8 +24,9 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 				^ self fail ] ].
 
 	"Comparing relations (slots with famix values)"
+	"We exclude source anchors because they are not relevant to model comparison"
 	relations := aFamixEntity class allSlots select: [ :slot |
-		             slot isFMRelationSlot ].
+		             slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
 				ifFalse: [ ^ self fail ] ].
