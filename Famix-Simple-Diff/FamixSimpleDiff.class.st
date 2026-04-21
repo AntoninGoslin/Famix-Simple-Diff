@@ -157,13 +157,19 @@ FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 { #category : 'as yet unclassified' }
 FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 
-	| goodSortBlock |
+	| goodSortBlock excludedClasses |
+	excludedClasses := {
+		                   FamixJavaWildcard.
+		                   FamixJavaAnnotationInstance.
+		                   FamixJavaAnnotationInstanceAttribute }.
+
 	^ (roots ifNil: [ roots := Dictionary new ])
 		  at: aFamixJavaModel
 		  ifAbsentPut: [
 				  | rootEntities |
-				  rootEntities := aFamixJavaModel rootEntities reject: [ :e |
-					                  e isStub ].
+				  rootEntities := aFamixJavaModel rootEntities reject: [ :entity |
+						                  entity name = '<Default Package>' or: [
+							                  excludedClasses includes: entity class ] ].
 				  goodSortBlock := self sortBlockFor: rootEntities anyOne.
 				  rootEntities sorted: goodSortBlock ]
 ]
