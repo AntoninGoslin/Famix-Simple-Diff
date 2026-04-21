@@ -137,6 +137,20 @@ FamixSimpleDiffTest >> testMethodsWithDifferentNamesAreNotEqual [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testRecursiveCompareEntityReturnFalseOnDeepDifferentModels [
+
+	| sd childMethod2 |
+	sd := FamixSimpleDiff new.
+	
+	"modify a child"
+	childMethod2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
+	childMethod2 name: 'getIntAttributeWithDifferentName'.
+	
+	"the models should not be equals"
+	self deny: (sd compareModel: mainModel1 to: mainModel2)
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testSameClassesAreEqual [
 
 	| sd entity1 entity2 |
