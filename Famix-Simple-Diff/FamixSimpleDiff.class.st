@@ -79,7 +79,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	val1 == val2 ifTrue: [ ^ true ].
 
 	aFMRelationSlot isToOne
-		ifTrue: [ ^ (self pathOfEntity: val1) = (self pathOfEntity: val2) ]
+		ifTrue: [ ^ (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2) ]
 		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
 				val1 size = val2 size ifFalse: [ ^ self fail ].
 				val1 := val1
@@ -99,9 +99,6 @@ FamixSimpleDiff >> computePathOfEntity: anEntity [
 	"We only work for single parent entities... And we hope this is the case always.
 	If not, talk to Guille, he has a point.
 	Read about lexical definition"
-	
-	"we create a special path for the case of primitives type"
-	anEntity isPrimitiveType ifTrue: [ ^ { #primitive . anEntity name } ].
 
 	self assert: anEntity containers asSet size <= 1.
 	
@@ -143,12 +140,6 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
 	| rootEntity |
-	
-	"we detect the case of primitives types -> begin by '#primitive'"
-	"return the correct primitive"
-	indexPath  first = #primitive ifTrue: [
-		^ model  allPrimitiveTypes detect: [ :current | current name = indexPath second ]
-	].
 	
 	rootEntity := (self entityRoots: model) at: indexPath first.
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
