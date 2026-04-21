@@ -99,6 +99,19 @@ FamixSimpleDiffTest >> testCorrespondingMethodsInSameModelIsSameEntity [
 	self assert: entity1 == entity2
 ]
 
+{ #category : 'as yet unclassified' }
+FamixSimpleDiffTest >> testCorrespondingPrimitiveTypesAreEqual [
+
+	| sd entity1 entity2 path |
+	sd := FamixSimpleDiff new.
+
+	entity1 := (mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()') declaredType.
+	path := sd pathOfEntity: entity1.
+	entity2 := sd entityAtPath: path inModel: mainModel2.
+	
+	self assert: (sd compareEntity: entity1 to: entity2)
+]
+
 { #category : 'tests' }
 FamixSimpleDiffTest >> testEntityWithDifferentRelationsSizesAreNotEquals [
 
@@ -118,18 +131,6 @@ FamixSimpleDiffTest >> testEntityWithDifferentRelationsSizesAreNotEquals [
 	entity2 methods: methodList.
 	
 	self deny: (sd compareEntity: entity1 to: entity2)
-]
-
-FamixSimpleDiffTest >> testCorrespondingPrimitiveTypesAreEqual [
-
-	| sd entity1 entity2 path |
-	sd := FamixSimpleDiff new.
-
-	entity1 := (mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()') declaredType.
-	path := sd pathOfEntity: entity1.
-	entity2 := sd entityAtPath: path inModel: mainModel2.
-	
-	self assert: (sd compareEntity: entity1 to: entity2)
 ]
 
 { #category : 'tests' }
@@ -173,6 +174,14 @@ FamixSimpleDiffTest >> testMethodsWithDifferentNamesAreNotEqual [
 	self assert: (sd compareEntity: entity1 to: entity2) equals: false
 ]
 
+{ #category : 'as yet unclassified' }
+FamixSimpleDiffTest >> testNotEqualModelsAreNotEqual [
+
+	| sd |
+	sd := FamixSimpleDiff new.
+	self deny: (sd compareModel: mainModel1 to: libraryModel)
+]
+
 { #category : 'tests' }
 FamixSimpleDiffTest >> testRecursiveCompareEntityReturnFalseOnDeepDifferentModels [
 
@@ -185,13 +194,6 @@ FamixSimpleDiffTest >> testRecursiveCompareEntityReturnFalseOnDeepDifferentModel
 	
 	"the models should not be equals"
 	self deny: (sd compareModel: mainModel1 to: mainModel2)
-]
-  
-FamixSimpleDiffTest >> testNotEqualModelsAreNotEqual [
-
-	| sd |
-	sd := FamixSimpleDiff new.
-	self deny: (sd compareModel: mainModel1 to: libraryModel)
 ]
 
 { #category : 'tests' }
