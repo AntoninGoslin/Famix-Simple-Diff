@@ -239,3 +239,148 @@ FamixSimpleDiffTest >> testSortBlockOrdersByName [
 	self assert: (block value: entity2 value: entity1).
 	self deny: (block value: entity1 value: entity2)
 ]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenFiltersStubsAndInitializers [
+	| sd parent normalMethod stubMethod initializeMethod res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and stubs methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	normalMethod := FamixJavaMethod new name: 'normalMethod'; 
+	isStub: false.
+	stubMethod  := FamixJavaMethod new name: 'stubMethod'; 
+	isStub: true.
+	initializeMethod := FamixJavaMethod new name: '<Initializer>';
+	isStub: false.
+	
+	"testing the sort"
+	parent methods: { normalMethod . stubMethod . initializeMethod }.
+	res := sd sortedChildren: parent.
+	
+	"the filter keep just 1 method"
+	self assert: res size equals: 1.
+	self assert: res first equals: normalMethod .
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName [
+	| sd parent aBeginMethod bBeginMethod res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and child methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	aBeginMethod := FamixJavaMethod new name: 'aBeginMethod'.
+	bBeginMethod := FamixJavaMethod new name: 'bBeginMethod'.
+	
+	"testing the sort"
+	parent methods: { bBeginMethod . aBeginMethod}.
+	res := sd sortedChildren: parent. 
+	self assert: res first equals: aBeginMethod.
+	self assert: res second equals: bBeginMethod.
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameNameNotSameAnchors [
+	| sd parent aBeginMethod bBeginMethod anchor1 anchor2 res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and child methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	aBeginMethod := FamixJavaMethod new name: 'aBeginMethod';
+	signature: 'aBeginMethod()'.
+	bBeginMethod := FamixJavaMethod new name: 'bBeginMethod';
+	signature: 'bBeginMethod()'.
+	
+	"init file anchor, must be different for this test"
+	anchor1 := FamixJavaIndexedFileAnchor new endPos: 20.
+	anchor2 := FamixJavaIndexedFileAnchor new endPos: 10.
+	
+	"giving created anchors to the methods"
+	aBeginMethod sourceAnchor: anchor1.
+	bBeginMethod sourceAnchor: anchor2.
+	
+	"testing the sort"
+	parent methods: { bBeginMethod . aBeginMethod}.
+	res := sd sortedChildren: parent. 
+	
+	self assert: res first equals: aBeginMethod.
+	self assert: res second equals: bBeginMethod.
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenFirstAnchorIsMissing [
+	| sd parent method1 method2 anchor2 res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and child methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	
+	"init same method"
+	method1 := FamixJavaMethod new name: 'SameMethod'.
+	method2 := FamixJavaMethod new name: 'SameMethod'.
+	
+	"init anchor"
+	anchor2 := FamixJavaIndexedFileAnchor new endPos: 20.
+	method2 sourceAnchor: anchor2.
+	
+	"testing the sort"
+	parent methods: { method2 . method1}.
+	res := sd sortedChildren: parent. 
+	
+	self assert: res size equals: 2.
+	self assert: res first equals: method1.
+	self assert: res second equals: method2.
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenSameName [
+	| sd parent method1 method2 anchor1 anchor2 res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and child methods, must be the same for this test"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	method1 := FamixJavaMethod new name: 'SameMethod'.
+	method2 := FamixJavaMethod new name: 'SameMethod'.
+	
+	"init file anchor, must be different for this test"
+	anchor1 := FamixJavaIndexedFileAnchor new endPos: 10.
+	anchor2 := FamixJavaIndexedFileAnchor new endPos: 20.
+	
+	"giving created anchors to the methods"
+	method1 sourceAnchor: anchor1.
+	method2 sourceAnchor: anchor2.
+	
+	"testing the sort"
+	parent methods: { method2 . method1}.
+	res := sd sortedChildren: parent. 
+	self assert: res first equals: method1.
+	self assert: res second equals: method2. 
+	 
+	
+	
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenSecondAnchorIsMissing [
+	| sd parent method1 method2 anchor1 res |
+	sd := FamixSimpleDiff new.
+	
+	"init parent and child methods"
+	parent := FamixJavaClass new name: 'ParentClass'.
+	
+	"init methods"
+	method1 := FamixJavaMethod new name: 'SameMethod'.
+	method2 := FamixJavaMethod new name: 'SameMethod'.
+	
+	anchor1 := FamixJavaIndexedFileAnchor new endPos: 10.
+	method1 sourceAnchor: anchor1.
+	
+	"testing the sort"
+	parent methods: { method2 . method1}.
+	res := sd sortedChildren: parent. 
+	
+	self assert: res size equals: 2.
+	self assert: res first equals: method1.
+	self assert: res second equals: method2.
+]
