@@ -96,6 +96,27 @@ FamixSimpleDiffTest >> testCorrespondingMethodsInSameModelIsSameEntity [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testEntityWithDifferentRelationsSizesAreNotEquals [
+
+	| sd entity1 entity2 newMethod methodList |
+	sd := FamixSimpleDiff new.
+	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
+	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass'.
+	
+	"adding a new method to set a difference between the two models"
+	newMethod := FamixJavaMethod new name: 'newMethod()'.
+	
+	"adding the method in the current method list"
+	methodList := entity2 methods asOrderedCollection.
+	methodList add: newMethod.
+	
+	"changing the method list"
+	entity2 methods: methodList.
+	
+	self deny: (sd compareEntity: entity1 to: entity2)
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testEqualClassesAreEqual [
 
 	| sd entity1 |
