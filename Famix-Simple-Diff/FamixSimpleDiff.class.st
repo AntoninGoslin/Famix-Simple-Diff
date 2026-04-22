@@ -10,7 +10,7 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	| properties relations |
@@ -35,7 +35,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	^ true
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'comparing' }
 FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 
 	(self entityRoots: aFamixJavaModel) do: [ :root |
@@ -49,7 +49,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 	^ true
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'comparing' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
 
 	| val1 val2 sortBlock |
@@ -95,7 +95,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 					ifTrue: [ ^ true ] ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'path-computing' }
 FamixSimpleDiff >> computePathOfEntity: anEntity [
 	"We only work for single parent entities... And we hope this is the case always.
 	If not, talk to Guille, he has a point.
@@ -112,7 +112,7 @@ FamixSimpleDiff >> computePathOfEntity: anEntity [
 	^ { ((self entityRoots: anEntity mooseModel) indexOf: anEntity) }
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'accessing' }
 FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 
 	| path |
@@ -121,13 +121,13 @@ FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 	
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'debug' }
 FamixSimpleDiff >> debugOn [
 
 	debug := true
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 
 	indexPath ifEmpty: [ ^ entity ].
@@ -137,7 +137,7 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 		  fromEntity: ((self sortedChildren: entity) at: indexPath first)
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
 	| rootEntity |
@@ -146,7 +146,7 @@ FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'accessing' }
 FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 
 	| goodSortBlock excludedClasses |
@@ -166,14 +166,14 @@ FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 				  rootEntities sorted: goodSortBlock ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'asserting' }
 FamixSimpleDiff >> fail [
 
 	debug ifTrue: [ self halt ].
 	^ false
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'initialization' }
 FamixSimpleDiff >> initialize [
 	
 	super initialize.
@@ -181,7 +181,7 @@ FamixSimpleDiff >> initialize [
 	childrenCache := LRUCache new maximumWeight: 100
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'path-computing' }
 FamixSimpleDiff >> pathOfEntity: anEntity [
 
 	^ anEntity
@@ -189,7 +189,7 @@ FamixSimpleDiff >> pathOfEntity: anEntity [
 		  ifAbsentPut: [ self computePathOfEntity: anEntity ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'path-computing' }
 FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionOrSmellingThing [
 
 	| target targettedEntities |
@@ -206,7 +206,7 @@ FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionO
 		  self pathOfEntity: e ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'comparing' }
 FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 
 	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
@@ -249,7 +249,7 @@ FamixSimpleDiff >> sortBlockFor: anEntity [
 					  valA < valB ] ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'sorting' }
 FamixSimpleDiff >> sortedChildren: entity [
 
 	| res |
