@@ -51,6 +51,21 @@ FamixSimpleDiffTest >> testClassesWithDifferentSuperclassesAreNotEqual [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameClasses [
+	| sd class1 class2 |
+	sd := FamixSimpleDiff new.
+	
+	"same classes"
+	class1 := FamixJavaClass new name: 'MyClass'; 
+	isStub: false.
+	class2 := FamixJavaClass new name: 'MyClass'; 
+	isStub: false.
+	
+	self assert: (sd compareEntity: class1 to: class2).
+	self assert: sd differences isEmpty.
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCorrespondingClassesAreEqual [
 
 	| sd entity1 entity2 path |
