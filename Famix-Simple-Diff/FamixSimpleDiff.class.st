@@ -11,6 +11,11 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'accessing' }
+FamixSimpleDiff >> addDifference: aFamixDiff [
+	differences add: aFamixDiff
+]
+
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
