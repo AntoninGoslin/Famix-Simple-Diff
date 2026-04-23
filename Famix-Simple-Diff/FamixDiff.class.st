@@ -11,6 +11,18 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'instance creation' }
+FamixDiff class >> entity: anEntity changeType: aSymbol expectedValue: val1 actualValue: val2 [
+
+	| difference |
+	difference := FamixDiff new.
+	difference entity: anEntity.
+	difference changeType: aSymbol.
+	difference expectedValue: val1.
+	difference actualValue: val2.
+	^ difference
+]
+
 { #category : 'accessing' }
 FamixDiff >> actualValue [
 
