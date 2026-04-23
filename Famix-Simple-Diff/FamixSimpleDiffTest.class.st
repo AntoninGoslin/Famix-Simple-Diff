@@ -66,7 +66,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 	
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: #entityChanged.
+	self assert: diff changeType equals: #propertyChanged.
 	self assert: diff expectedValue equals: 'MyClass'.
 	self assert: diff actualValue equals: 'MyOtherClass'.
 	
