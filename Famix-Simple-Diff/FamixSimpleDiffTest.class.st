@@ -51,15 +51,35 @@ FamixSimpleDiffTest >> testClassesWithDifferentSuperclassesAreNotEqual [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentType [
+	| sd class method diff |
+	sd := FamixSimpleDiff new.
+	
+	"different classes"
+	class := FamixJavaClass new name: 'MyClass'.
+	method := FamixJavaMethod new name: 'MyMethod'.
+	
+	"checking the list of diff"
+	self deny: (sd compareEntity: class to: method).
+	self deny: sd differences isEmpty.
+	self assert: sd differences size equals: 1.
+	
+	diff := sd differences first.
+	
+	self assert: diff changeType equals: #entityChanged.
+	self assert: diff expectedValue equals: 'FamixJavaClass'.
+	self assert: diff actualValue equals: 'FamixJavaMethod'.
+	
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameClasses [
 	| sd class1 class2 |
 	sd := FamixSimpleDiff new.
 	
 	"same classes"
-	class1 := FamixJavaClass new name: 'MyClass'; 
-	isStub: false.
-	class2 := FamixJavaClass new name: 'MyClass'; 
-	isStub: false.
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
 	
 	self assert: (sd compareEntity: class1 to: class2).
 	self assert: sd differences isEmpty.
