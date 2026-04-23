@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'roots',
 		'childrenCache',
-		'debug'
+		'debug',
+		'differences'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
@@ -127,6 +128,11 @@ FamixSimpleDiff >> debugOn [
 	debug := true
 ]
 
+{ #category : 'accessing' }
+FamixSimpleDiff >> differences [
+	^ differences
+]
+
 { #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 
@@ -178,7 +184,8 @@ FamixSimpleDiff >> initialize [
 	
 	super initialize.
 	debug := false.
-	childrenCache := LRUCache new maximumWeight: 100
+	childrenCache := LRUCache new maximumWeight: 100.
+	differences := OrderedCollection new.
 ]
 
 { #category : 'path-computing' }
