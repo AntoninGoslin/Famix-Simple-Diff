@@ -70,3 +70,24 @@ FamixDiff >> expectedValue: anObject [
 
 	expectedValue := anObject
 ]
+
+{ #category : 'printing' }
+FamixDiff >> printOn: aStream [
+	"Redifine the display of the FamixDiff class"
+
+	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
+	 
+	super printOn: aStream.
+	aStream nextPutAll: ' Famix Difference ('.
+	aStream print: changeType.
+	
+	aStream 
+		nextPutAll: ' -> Expected: '; 
+		print: expectedValue;
+		nextPutAll: ' | Actual: ';
+		print: actualValue.
+	
+	aStream nextPutAll: ' | On: '.
+	aStream print: entity.
+	aStream nextPutAll: ')'.
+]
