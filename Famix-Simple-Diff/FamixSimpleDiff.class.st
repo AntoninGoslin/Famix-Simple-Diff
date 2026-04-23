@@ -20,7 +20,7 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	| properties relations diff isEquals |
-	isEquals := false.
+	isEquals := true.
 	
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
 	aFamixEntity class = otherFamixEntity class ifFalse: [ 
