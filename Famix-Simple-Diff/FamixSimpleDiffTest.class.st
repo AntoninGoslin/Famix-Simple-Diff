@@ -95,6 +95,27 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndNotSameMethods [
+	| sd class1 class2 method1 method2 method3 |
+	sd := FamixSimpleDiff new.
+	
+	"same classes"
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	"same methods"
+	method1 := FamixJavaMethod new name: 'myMethod'.
+	method2 := FamixJavaMethod new name: 'myMethod'.
+	method3 := FamixJavaMethod new name: 'newMethod'.
+		
+	class1 methods: { method1 }.
+	class2 methods: { method2 . method3 }.
+	
+	self deny: (sd compareEntity: class1 to: class2).
+	self assert: sd differences size equals: 1.
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameClasses [
 	| sd class1 class2 |
 	sd := FamixSimpleDiff new.
@@ -102,6 +123,26 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameCla
 	"same classes"
 	class1 := FamixJavaClass new name: 'MyClass'.
 	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	self assert: (sd compareEntity: class1 to: class2).
+	self assert: sd differences isEmpty.
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMethods [
+	| sd class1 class2 method1 method2 |
+	sd := FamixSimpleDiff new.
+	
+	"same classes"
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	"same methods"
+	method1 := FamixJavaMethod new name: 'myMethod'.
+	method2 := FamixJavaMethod new name: 'myMethod'.
+		
+	class1 methods: { method1 }.
+	class2 methods: { method2 }.
 	
 	self assert: (sd compareEntity: class1 to: class2).
 	self assert: sd differences isEmpty.
