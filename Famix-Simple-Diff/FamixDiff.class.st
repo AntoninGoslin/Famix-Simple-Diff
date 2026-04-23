@@ -78,7 +78,7 @@ FamixDiff >> printOn: aStream [
 	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
 	 
 	super printOn: aStream.
-	aStream nextPutAll: ' Famix Difference ('.
+	aStream nextPutAll: '('.
 	aStream print: changeType.
 	
 	aStream 
