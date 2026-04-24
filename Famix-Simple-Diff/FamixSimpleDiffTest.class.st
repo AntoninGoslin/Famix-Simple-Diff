@@ -96,7 +96,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 
 { #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsAdded [
-	| sd class1 class2 method1 method2 method3 model1 model2 |
+	| sd class1 class2 method1 method2 method3 model1 model2 diff |
 	sd := FamixSimpleDiff new.
 
 	"we need to create a model to contain our entities"
@@ -120,6 +120,45 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 	
 	self deny: (sd compareEntity: class1 to: class2).
 	self assert: sd differences size equals: 1.
+		
+	diff := sd differences first.
+	
+	self assert: diff changeType equals: #entityAdded.
+	self assert: diff expectedValue equals: nil.
+	self assert: diff actualValue name equals: 'newMethod'.
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsDeleted [
+	| sd class1 class2 method1 method2 method3 model1 model2 diff |
+	sd := FamixSimpleDiff new.
+
+	"we need to create a model to contain our entities"
+	model1 := FamixJavaModel new.
+	model2 := FamixJavaModel new.	
+	
+	"same classes"
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	"methods"
+	method1 := FamixJavaMethod new name: 'myMethod'.
+	method2 := FamixJavaMethod new name: 'myMethod'.
+	method3 := FamixJavaMethod new name: 'deletedMethod'.
+	class1 methods: { method1 . method3 }.
+	class2 methods: { method2 }.
+	
+	model1 add: class1.
+	model2 add: class2.
+	
+	self deny: (sd compareEntity: class1 to: class2).
+	self assert: sd differences size equals: 1.
+		
+	diff := sd differences first.
+	
+	self assert: diff changeType equals: #entityRemoved.
+	self assert: diff expectedValue name equals: 'deletedMethod'.
+	self assert: diff actualValue equals: nil.
 ]
 
 { #category : 'tests' }
