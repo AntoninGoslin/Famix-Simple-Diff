@@ -170,7 +170,24 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 							self addDifference: diff.
 						].						
 					].
+
 					"addition case, not here in the model 1, but here in the model 2"
+					val1 do:[ :actualEntity |
+						| path allInBag|		
+						"check the path of the actual entity, if all the paths are not in the actual, so we have a addition"
+						path := self pathesForMaybeMultiRelation: actualEntity .
+						allInBag := (path allSatisfy: [ :p | expectedBag  includes: p]).
+						allInBag ifFalse: [ 
+							diff := (
+								FamixDiff
+								entity: otherFamixEntity
+								changeType: #entityAdded
+								expectedValue: nil
+								actualValue: actualEntity
+							).
+							self addDifference: diff.
+						].						
+					].
 				].
 		].
 ]
