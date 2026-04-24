@@ -95,7 +95,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndNotSameMethods [
+FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsAdded [
 	| sd class1 class2 method1 method2 method3 |
 	sd := FamixSimpleDiff new.
 	
