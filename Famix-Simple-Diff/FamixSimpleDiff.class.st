@@ -190,6 +190,8 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 					].
 				].
 		].
+	
+		^ isEquals.
 ]
 
 { #category : 'path-computing' }
