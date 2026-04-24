@@ -96,8 +96,12 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 
 { #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsAdded [
-	| sd class1 class2 method1 method2 method3 |
+	| sd class1 class2 method1 method2 method3 model1 model2 |
 	sd := FamixSimpleDiff new.
+
+	"we need to create a model to contain our entities"
+	model1 := FamixJavaModel new.
+	model2 := FamixJavaModel new.	
 	
 	"same classes"
 	class1 := FamixJavaClass new name: 'MyClass'.
@@ -110,6 +114,9 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 		
 	class1 methods: { method1 }.
 	class2 methods: { method2 . method3 }.
+	
+	model1 add: class1.
+	model2 add: class2.
 	
 	self deny: (sd compareEntity: class1 to: class2).
 	self assert: sd differences size equals: 1.
@@ -130,8 +137,12 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameCla
 
 { #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMethods [
-	| sd class1 class2 method1 method2 |
+	| sd class1 class2 method1 method2 model1 model2 |
 	sd := FamixSimpleDiff new.
+	
+	"we need to create a model to contain our entities"
+	model1 := FamixJavaModel new.
+	model2 := FamixJavaModel new.
 	
 	"same classes"
 	class1 := FamixJavaClass new name: 'MyClass'.
@@ -144,11 +155,11 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMetho
 	class1 methods: { method1 }.
 	class2 methods: { method2 }.
 	
+	model1 add: class1.
+	model2 add: class2.
+	
 	self assert: (sd compareEntity: class1 to: class2).
 	self assert: sd differences isEmpty.
-	
-
-"TODO -> FIX"
 ]
 
 { #category : 'tests' }
