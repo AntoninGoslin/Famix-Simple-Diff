@@ -89,7 +89,9 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 { #category : 'comparing' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
 
-	| val1 val2 sortBlock |
+	| val1 val2 sortBlock isEquals diff areSame|
+	isEquals := true.
+	
 	aFMRelationSlot isToOne
 		ifTrue: [
 				val1 := aFMRelationSlot read: aFamixEntity.
@@ -97,8 +99,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 		ifFalse: [
 				| rejectBlock |
 				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection.
-				val2 := (aFMRelationSlot read: otherFamixEntity)
-					        asOrderedCollection.
+				val2 := (aFMRelationSlot read: otherFamixEntity)asOrderedCollection.
 
 				sortBlock := val1
 					             ifEmpty: [ self sortBlock ]
@@ -117,7 +118,22 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	val1 == val2 ifTrue: [ ^ true ].
 
 	aFMRelationSlot isToOne
-		ifTrue: [ ^ (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2) ]
+		ifTrue: [
+			"if we dont have the same relations, so it changed, we have to record it"
+			areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+			areSame ifFalse: [ 
+				diff := (
+					FamixDiff 
+					entity: otherFamixEntity
+					changeType: #relationChanged
+					expectedValue: val1 
+					actualValue: val2 
+				).
+				self addDifference: diff.
+				isEquals := false.
+			]
+		]
+
 		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
 				val1 size = val2 size ifFalse: [ ^ self fail ].
 				val1 := val1
