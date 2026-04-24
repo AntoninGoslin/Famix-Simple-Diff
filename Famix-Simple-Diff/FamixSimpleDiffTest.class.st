@@ -146,6 +146,9 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMetho
 	
 	self assert: (sd compareEntity: class1 to: class2).
 	self assert: sd differences isEmpty.
+	
+
+"TODO -> FIX"
 ]
 
 { #category : 'tests' }
