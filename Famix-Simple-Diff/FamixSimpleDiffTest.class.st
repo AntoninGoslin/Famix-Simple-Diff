@@ -113,7 +113,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 	method3 := FamixJavaMethod new name: 'newMethod'.
 		
 	class1 methods: { method1 }.
-	class2 methods: { method2 . method3 }.
+	class2 methods: { method3 . method2 }.
 	
 	model1 add: class1.
 	model2 add: class2.
@@ -145,7 +145,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 	method1 := FamixJavaMethod new name: 'myMethod'.
 	method2 := FamixJavaMethod new name: 'myMethod'.
 	method3 := FamixJavaMethod new name: 'deletedMethod'.
-	class1 methods: { method1 . method3 }.
+	class1 methods: { method3 . method1 }.
 	class2 methods: { method2 }.
 	
 	model1 add: class1.
