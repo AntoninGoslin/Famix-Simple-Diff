@@ -89,7 +89,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 { #category : 'comparing' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
 
-	| val1 val2 sortBlock isEquals diff areSame|
+	| val1 val2 sortBlock isEquals diff|
 	isEquals := true.
 	
 	aFMRelationSlot isToOne
@@ -119,6 +119,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 
 	aFMRelationSlot isToOne
 		ifTrue: [
+			| areSame | 
 			"if we dont have the same relations, so it changed, we have to record it"
 			areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
 			areSame ifFalse: [ 
@@ -133,19 +134,45 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 				isEquals := false.
 			]
 		]
-
-		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
-				val1 size = val2 size ifFalse: [ ^ self fail ].
-				val1 := val1
+	
+		"This is a toMany Relation! and the value should be a collection"
+		ifFalse: [
+				
+				"if we have different sizes of val, here we have an addition or a deletion"
+				"val1 size = val2 size ifFalse: [ ^ self fail ]."
+				
+				| expectedBag actualBag|
+				expectedBag := val1
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
-				val2 := val2
+				actualBag := val2
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
 
-				val1 = val2
-					ifFalse: [ ^ self fail ]
-					ifTrue: [ ^ true ] ]
+				"compute additions and deletion between bags"
+				 expectedBag = actualBag ifFalse: [ 
+					isEquals := false.
+					
+					"deletion case, here in the model 1, but not in model 2"
+					val1 do:[ :expectedEntity |
+						| path allInBag|		
+						"check the path of the expected entity, if all the paths are not in the expectedBag, so we have a deletion"
+						path := self pathesForMaybeMultiRelation: expectedEntity.
+						allInBag := (path allSatisfy: [ :p | actualBag  includes: p]).
+						allInBag ifFalse: [ 
+							diff := (
+								FamixDiff 
+								entity: otherFamixEntity
+								changeType: #entityRemoved
+								expectedValue: expectedEntity 
+								actualValue: nil
+							).
+							self addDifference: diff.
+						].						
+					].
+					"addition case, not here in the model 1, but here in the model 2"
+				].
+		].
 ]
 
 { #category : 'path-computing' }
