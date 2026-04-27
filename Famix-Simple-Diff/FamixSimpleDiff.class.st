@@ -18,6 +18,21 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 ]
 
 { #category : 'accessing' }
+FamixSimpleDiff >> clearRemainingAdditionOf: aStream target: anEntity [
+	|  hasCleaned diff |
+	hasCleaned := false.
+	
+	[ aStream atEnd ] 
+	whileFalse: [
+				diff := (FamixDiff entity: anEntity changeType: #entityAdded expectedValue: nil actualValue: anEntity next).
+				self addDifference: diff.
+				hasCleaned := true. "we added something"
+	].
+
+	^ hasCleaned.
+]
+
+{ #category : 'accessing' }
 FamixSimpleDiff >> clearRemainingDeletionOf: aStream target: anEntity [
 	|  hasCleaned diff |
 	hasCleaned := false.
