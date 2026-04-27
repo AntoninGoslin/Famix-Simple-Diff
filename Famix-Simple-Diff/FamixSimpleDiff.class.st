@@ -222,6 +222,20 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 		^ isEquals.
 ]
 
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
+	| areSame diff | 
+
+	"if we dont have the same relations, so it changed, we have to record it"
+	areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+	areSame ifFalse: [ 
+		diff := (FamixDiff entity: anEntity changeType: #relationChanged expectedValue: val1 actualValue: val2 ).
+		self addDifference: diff.
+	].
+
+	^ areSame "if they are not the same, so they are not equals"
+]
+
 { #category : 'path-computing' }
 FamixSimpleDiff >> computePathOfEntity: anEntity [
 	"We only work for single parent entities... And we hope this is the case always.
