@@ -223,6 +223,59 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 ]
 
 { #category : 'comparing' }
+FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
+	| stream1 stream2 isEquals diff|
+	isEquals := true.
+	
+	stream1 := val1 readStream.
+	stream2 := val2 readStream.
+	
+	"looking the streams"
+	[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [ 
+		| elt1 elt2 name1 name2|
+		
+		"setup name"
+		elt1 := stream1 peek.
+		elt2 := stream2 peek.
+		
+		name1 := elt1 mooseName.
+		name2 := elt2 mooseName.
+		
+		name1 = name2 
+		"move forward both ptr if identicals"
+		ifTrue: [ 
+			stream1 next.
+			stream2 next.
+		]
+	
+		ifFalse: [ 
+			"deletion case"
+			name1 < name2 
+			ifTrue: [ 
+				diff := (FamixDiff entity: anEntity changeType: #entityRemoved expectedValue: elt1 actualValue: nil).
+				self addDifference: diff.
+				isEquals := false.
+				stream1 next. "ptr1++"
+			]
+		
+			"addition case"	
+			ifFalse: [ 
+				diff := (FamixDiff entity: anEntity changeType: #entityAdded expectedValue: nil actualValue: elt2).
+				self addDifference: diff.
+				isEquals := false.
+				stream2 next."ptr2++"
+			]
+		].
+	].
+
+	"cleaning end of pointers, checking if they have clean something"
+	(self clearRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
+	(self clearRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
+	
+	^ isEquals 
+]
+
+{ #category : 'comparing' }
 FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
 	| areSame diff | 
 
