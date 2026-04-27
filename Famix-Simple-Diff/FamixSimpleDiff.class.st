@@ -120,9 +120,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
-
-	| val1 val2 sortBlock isEquals diff|
-	isEquals := true.
+	| val1 val2 sortBlock|
 	
 	aFMRelationSlot isToOne
 		ifTrue: [
@@ -149,77 +147,11 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	This guards for that..."
 	val1 == val2 ifTrue: [ ^ true ].
 
-	aFMRelationSlot isToOne
-		ifTrue: [
-			| areSame | 
-			"if we dont have the same relations, so it changed, we have to record it"
-			areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
-			areSame ifFalse: [ 
-				diff := (FamixDiff entity: otherFamixEntity changeType: #relationChanged expectedValue: val1 actualValue: val2 ).
-				self addDifference: diff.
-				isEquals := false.
-			]
-		]
+	^ aFMRelationSlot isToOne
+		ifTrue: [ self compareToOneRelation: val1 actual: val2 target: otherFamixEntity ]
 	
 		"This is a toMany Relation! and the value should be a collection"
-		ifFalse: [
-			| stream1 stream2|
-			stream1 := val1 readStream.
-			stream2 := val2 readStream.
-			
-			"looking the streams"
-			[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [ 
-				| elt1 elt2 name1 name2|
-				
-				"setup name"
-				elt1 := stream1 peek.
-				elt2 := stream2 peek.
-				
-				name1 := elt1 mooseName.
-				name2 := elt2 mooseName.
-				
-				name1 = name2 
-				"move forward both ptr"
-				ifTrue: [ 
-					stream1 next.
-					stream2 next.
-				]
-			
-				ifFalse: [ 
-					"deletion case"
-					name1 < name2 
-					ifTrue: [ 
-						diff := (FamixDiff entity: otherFamixEntity changeType: #entityRemoved expectedValue: elt1 actualValue: nil).
-						self addDifference: diff.
-						isEquals := false.
-						stream1 next. "ptr1++"
-					]
-					"addition case"	
-					ifFalse: [ 
-						diff := (FamixDiff entity: otherFamixEntity changeType: #entityAdded expectedValue: nil actualValue: elt2).
-						self addDifference: diff.
-						isEquals := false.
-						stream2 next."ptr2++"
-					]
-				].
-			].
-
-			"clear all deletion of stream1"
-			[ stream1 atEnd ] whileFalse: [
-				diff := (FamixDiff entity: otherFamixEntity changeType: #entityRemoved expectedValue: stream1 next actualValue: nil).
-				self addDifference: diff.
-				isEquals := false.
-			].
-		
-			"clear all addition of stream2"
-			[ stream2 atEnd ] whileFalse: [
-				diff := (FamixDiff entity: otherFamixEntity changeType: #entityAdded expectedValue: nil actualValue: stream2 next).
-				self addDifference: diff.
-				isEquals := false.
-			].
-		].
-	
-		^ isEquals.
+		ifFalse: [ self compareToManyRelation: val1 actual: val2  target: otherFamixEntity ]
 ]
 
 { #category : 'comparing' }
