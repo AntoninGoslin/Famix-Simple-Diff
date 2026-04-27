@@ -146,14 +146,17 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 	
 	"methods"
 	method1 := FamixJavaMethod new name: 'myMethod'.
+	method1 signature: 'myMethod()'.
 	method2 := FamixJavaMethod new name: 'myMethod'.
+	method2 signature: 'myMethod()'.
 	method3 := FamixJavaMethod new name: 'deletedMethod'.
+	method3 signature: 'deletedMethod()'.
 	class1 methods: { method3 . method1 }.
 	class2 methods: { method2 }.
 	
 	model1 add: class1.
 	model2 add: class2.
-	
+	"self halt."
 	self deny: (sd compareEntity: class1 to: class2).
 	self assert: sd differences size equals: 1.
 		

@@ -13,6 +13,7 @@ Class {
 
 { #category : 'accessing' }
 FamixSimpleDiff >> addDifference: aFamixDiff [
+	"1halt."
 	differences add: aFamixDiff
 ]
 
@@ -62,6 +63,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	relations := aFamixEntity class allSlots select: [ :slot |
 		             slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
 	relations do: [ :r |
+		"self haltIf: [ r name = #methods ]."
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
 				ifFalse: [ isEquals := false ] ].
 
