@@ -24,7 +24,7 @@ FamixSimpleDiff >> clearRemainingAdditionOf: aStream target: anEntity [
 	
 	[ aStream atEnd ] 
 	whileFalse: [
-				diff := (FamixDiff entity: anEntity changeType: #entityAdded expectedValue: nil actualValue: anEntity next).
+				diff := (FamixDiff entity: anEntity changeType: #entityAdded expectedValue: nil actualValue: aStream next).
 				self addDifference: diff.
 				hasCleaned := true. "we added something"
 	].
