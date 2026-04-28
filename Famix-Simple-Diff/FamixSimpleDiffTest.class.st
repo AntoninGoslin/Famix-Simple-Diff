@@ -84,11 +84,11 @@ FamixSimpleDiffTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeClean
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: #entityAdded.
+	self assert: diff first changeType equals: FamixDiff entityAdded.
 	self assert: diff first expectedValue equals: nil.
 	self assert: diff first actualValue name equals: 'methodB'.
 	
-	self assert: diff second changeType equals: #entityAdded.
+	self assert: diff second changeType equals: FamixDiff entityAdded.
 	self assert: diff second expectedValue equals: nil.
 	self assert: diff second actualValue name equals: 'methodC'.
 ]
@@ -127,11 +127,11 @@ FamixSimpleDiffTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCl
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: #entityRemoved .
+	self assert: diff first changeType equals: FamixDiff entityRemoved.
 	self assert: diff first expectedValue name equals: 'methodB'.
 	self assert: diff first actualValue equals: nil.
 	
-	self assert: diff second changeType equals: #entityRemoved .
+	self assert: diff second changeType equals: FamixDiff entityRemoved.
 	self assert: diff second expectedValue name equals: 'methodC'.
 	self assert: diff second actualValue equals: nil.
 ]
@@ -152,7 +152,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 	
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: #propertyChanged.
+	self assert: diff changeType equals: FamixDiff propertyChanged. 
 	self assert: diff expectedValue equals: 'MyClass'.
 	self assert: diff actualValue equals: 'MyOtherClass'.
 	
@@ -174,7 +174,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 	
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: #entityChanged.
+	self assert: diff changeType equals: FamixDiff entityChanged.
 	self assert: diff expectedValue equals: 'FamixJavaClass'.
 	self assert: diff actualValue equals: 'FamixJavaMethod'.
 	
@@ -209,7 +209,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenAMethodIsAddedBeforeEx
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: #entityAdded.
+	self assert: diff first changeType equals: FamixDiff entityAdded.
 	self assert: diff first expectedValue equals: nil.
 	self assert: diff first actualValue equals: methodA.
 ]
@@ -246,7 +246,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 		
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: #entityAdded.
+	self assert: diff changeType equals: FamixDiff entityAdded.
 	self assert: diff expectedValue equals: nil.
 	self assert: diff actualValue name equals: 'newMethod'.
 ]
@@ -282,7 +282,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 		
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: #entityRemoved.
+	self assert: diff changeType equals: FamixDiff entityRemoved.
 	self assert: diff expectedValue name equals: 'deletedMethod'.
 	self assert: diff actualValue equals: nil.
 ]
@@ -418,7 +418,7 @@ FamixSimpleDiffTest >> testDifferenceDetectedWhenToOneRelationChanged [
 
     diff := sd differences.
 
-    self assert: diff first changeType equals: #relationChanged.
+    self assert: diff first changeType equals:  FamixDiff relationChanged.
     self assert: diff first expectedValue equals: class1.
     self assert: diff first actualValue equals: class2
 ]
