@@ -21,12 +21,30 @@ FamixDiff class >> createEntityAdded: anEntity actualValue: actualValue [
 ]
 
 { #category : 'instance creation' }
+FamixDiff class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self entityChanged 
+		expectedValue: expectedValue 
+		actualValue: actualValue
+]
+
+{ #category : 'instance creation' }
 FamixDiff class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
 	^ self 
 		entity: anEntity 
 		changeType: self entityRemoved 
 		expectedValue: expectedValue 
 		actualValue: nil
+]
+
+{ #category : 'instance creation' }
+FamixDiff class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self propertyChanged 
+		expectedValue: expectedValue 
+		actualValue: actualValue 
 ]
 
 { #category : 'instance creation' }
