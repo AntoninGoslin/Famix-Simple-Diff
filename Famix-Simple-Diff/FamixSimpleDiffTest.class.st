@@ -181,6 +181,40 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenAMethodIsAddedBeforeExisting [
+	| sd class1 class2 methodA methodB1 methodB2 model1 model2 diff |
+	sd := FamixSimpleDiff new.
+
+	model1 := FamixJavaModel new.
+	model2 := FamixJavaModel new.	
+	
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	methodA := FamixJavaMethod new name: 'methodA'.
+	methodA signature: 'methodA()'.
+	methodB1 := FamixJavaMethod new name: 'methodB'.
+	methodB1 signature: 'methodB()'.
+	methodB2 := FamixJavaMethod new name: 'methodB'.
+	methodB2 signature: 'methodB()'.
+	
+	class1 methods: { methodB1 }.
+	class2 methods: { methodA . methodB2 }.
+	
+	model1 add: class1.
+	model2 add: class2.
+	
+	self deny: (sd compareEntity: class1 to: class2).
+	self assert: sd differences size equals: 1.
+		
+	diff := sd differences.
+	
+	self assert: diff first changeType equals: #entityAdded.
+	self assert: diff first expectedValue equals: nil.
+	self assert: diff first actualValue equals: methodA.
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsAdded [
 	| sd class1 class2 method1 method2 method3 model1 model2 diff |
 	sd := FamixSimpleDiff new.
