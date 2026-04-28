@@ -55,14 +55,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
 	aFamixEntity class = otherFamixEntity class ifFalse: [ 
-		diff := (
-			FamixDiff 
-			entity: otherFamixEntity
-			changeType: #entityChanged
-			expectedValue: aFamixEntity class name 
-			actualValue: otherFamixEntity class name
-		).
-			
+		diff := (FamixDiff entity: otherFamixEntity changeType: #entityChanged expectedValue: aFamixEntity class name actualValue: otherFamixEntity class name).
 		self addDifference: diff.
 		^ self fail
 	].
@@ -76,13 +69,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 				prop1 := p read: aFamixEntity.
 				prop2 := p read: otherFamixEntity.
 				
-				diff := (
-					FamixDiff 
-					entity: otherFamixEntity
-					changeType: #propertyChanged
-					expectedValue: prop1 
-					actualValue: prop2 
-				).
+				diff := (FamixDiff entity: otherFamixEntity changeType: #propertyChanged expectedValue: prop1 actualValue: prop2).
 				self addDifference: diff.
 				isEquals := false 
 			] 
@@ -90,8 +77,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	"Comparing relations (slots with famix values)"
 	"We exclude source anchors because they are not relevant to model comparison"
-	relations := aFamixEntity class allSlots select: [ :slot |
-		             slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
+	relations := aFamixEntity class allSlots select: [ :slot | slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
 	relations do: [ :r |
 		"self haltIf: [ r name = #methods ]."
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
