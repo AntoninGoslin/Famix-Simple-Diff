@@ -23,6 +23,31 @@ FamixDiff class >> entity: anEntity changeType: aSymbol expectedValue: val1 actu
 	^ difference
 ]
 
+{ #category : 'constants' }
+FamixDiff class >> entityAdded [
+	^ #entityAdded
+]
+
+{ #category : 'constants' }
+FamixDiff class >> entityChanged [
+	^ #entityChanged 
+]
+
+{ #category : 'constants' }
+FamixDiff class >> entityRemoved [
+	^ #entityRemoved
+]
+
+{ #category : 'constants' }
+FamixDiff class >> propertyChanged [ 
+	^ #propertyChanged 
+]
+
+{ #category : 'constants' }
+FamixDiff class >> relationChanged [ 
+	^ #relationChanged 
+]
+
 { #category : 'accessing' }
 FamixDiff >> actualValue [
 
