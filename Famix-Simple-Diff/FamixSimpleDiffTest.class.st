@@ -51,6 +51,92 @@ FamixSimpleDiffTest >> testClassesWithDifferentSuperclassesAreNotEqual [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeCleaned [
+	| sd class1 class2 model1 model2 diff methodA1 methodA2 methodB methodC |
+	sd := FamixSimpleDiff new.
+
+	"we need to create a model to contain our entities"
+	model1 := FamixJavaModel new.
+	model2 := FamixJavaModel new.	
+	
+	"same classes"
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	"same methods"
+	methodA1 := FamixJavaMethod new name: 'methodA'.
+	methodA1 signature: 'methodA()'.
+	methodA2 := FamixJavaMethod new name: 'methodA'.
+	methodA2 signature: 'methodA()'.
+	methodB := FamixJavaMethod new name: 'methodB'.
+	methodB signature: 'methodB()'.
+	methodC := FamixJavaMethod new name: 'methodC'.
+	methodC signature: 'methodC()'.
+		
+	class1 methods: { methodA1 }.
+	class2 methods: { methodA2 . methodB . methodC }.
+	
+	model1 add: class1.
+	model2 add: class2.
+	
+	self deny: (sd compareEntity: class1 to: class2).
+	self assert: sd differences size equals: 2.
+		
+	diff := sd differences.
+	
+	self assert: diff first changeType equals: #entityAdded.
+	self assert: diff first expectedValue equals: nil.
+	self assert: diff first actualValue name equals: 'methodB'.
+	
+	self assert: diff second changeType equals: #entityAdded.
+	self assert: diff second expectedValue equals: nil.
+	self assert: diff second actualValue name equals: 'methodC'.
+]
+
+{ #category : 'tests' }
+FamixSimpleDiffTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCleaned [
+	| sd class1 class2 model1 model2 diff methodA1 methodA2 methodB methodC |
+	sd := FamixSimpleDiff new.
+
+	"we need to create a model to contain our entities"
+	model1 := FamixJavaModel new.
+	model2 := FamixJavaModel new.	
+	
+	"same classes"
+	class1 := FamixJavaClass new name: 'MyClass'.
+	class2 := FamixJavaClass new name: 'MyClass'.
+	
+	"same methods"
+	methodA1 := FamixJavaMethod new name: 'methodA'.
+	methodA1 signature: 'methodA()'.
+	methodA2 := FamixJavaMethod new name: 'methodA'.
+	methodA2 signature: 'methodA()'.
+	methodB := FamixJavaMethod new name: 'methodB'.
+	methodB signature: 'methodB()'.
+	methodC := FamixJavaMethod new name: 'methodC'.
+	methodC signature: 'methodC()'.
+		
+	class1 methods: { methodA2 . methodB . methodC }.
+	class2 methods: { methodA1 }.
+	
+	model1 add: class1.
+	model2 add: class2.
+	
+	self deny: (sd compareEntity: class1 to: class2).
+	self assert: sd differences size equals: 2.
+		
+	diff := sd differences.
+	
+	self assert: diff first changeType equals: #entityRemoved .
+	self assert: diff first expectedValue name equals: 'methodB'.
+	self assert: diff first actualValue equals: nil.
+	
+	self assert: diff second changeType equals: #entityRemoved .
+	self assert: diff second expectedValue name equals: 'methodC'.
+	self assert: diff second actualValue equals: nil.
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentClasses [
 	| sd class1 class2 diff |
 	sd := FamixSimpleDiff new.
