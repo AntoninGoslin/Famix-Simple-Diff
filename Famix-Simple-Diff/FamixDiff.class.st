@@ -143,8 +143,6 @@ FamixDiff >> expectedValue: anObject [
 
 { #category : 'printing' }
 FamixDiff >> printOn: aStream [
-	"Redifine the display of the FamixDiff class"
-
 	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
 	 
 	super printOn: aStream.
