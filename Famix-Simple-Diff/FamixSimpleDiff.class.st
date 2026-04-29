@@ -13,6 +13,7 @@ Class {
 
 { #category : 'accessing' }
 FamixSimpleDiff >> addDifference: aFamixDiff [
+	"1halt."
 	differences add: aFamixDiff
 ]
 
@@ -62,6 +63,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	relations := aFamixEntity class allSlots select: [ :slot |
 		             slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
 	relations do: [ :r |
+		"self haltIf: [ r name = #methods ]."
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
 				ifFalse: [ isEquals := false ] ].
 
@@ -123,13 +125,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 			"if we dont have the same relations, so it changed, we have to record it"
 			areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
 			areSame ifFalse: [ 
-				diff := (
-					FamixDiff 
-					entity: otherFamixEntity
-					changeType: #relationChanged
-					expectedValue: val1 
-					actualValue: val2 
-				).
+				diff := (FamixDiff entity: otherFamixEntity changeType: #relationChanged expectedValue: val1 actualValue: val2 ).
 				self addDifference: diff.
 				isEquals := false.
 			]
@@ -137,58 +133,60 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	
 		"This is a toMany Relation! and the value should be a collection"
 		ifFalse: [
+			| stream1 stream2|
+			stream1 := val1 readStream.
+			stream2 := val2 readStream.
+			
+			"looking the streams"
+			[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [ 
+				| elt1 elt2 name1 name2|
 				
-				"if we have different sizes of val, here we have an addition or a deletion"
-				"val1 size = val2 size ifFalse: [ ^ self fail ]."
+				"setup name"
+				elt1 := stream1 peek.
+				elt2 := stream2 peek.
 				
-				| expectedBag actualBag|
-				expectedBag := val1
-					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
-					        as: Bag.
-				actualBag := val2
-					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
-					        as: Bag.
-
-				"compute additions and deletion between bags"
-				 expectedBag = actualBag ifFalse: [ 
-					isEquals := false.
-					
-					"deletion case, here in the model 1, but not in model 2"
-					val1 do:[ :expectedEntity |
-						| path allInBag|		
-						"check the path of the expected entity, if all the paths are not in the expectedBag, so we have a deletion"
-						path := self pathesForMaybeMultiRelation: expectedEntity.
-						allInBag := (path allSatisfy: [ :p | actualBag  includes: p]).
-						allInBag ifFalse: [ 
-							diff := (
-								FamixDiff 
-								entity: otherFamixEntity
-								changeType: #entityRemoved
-								expectedValue: expectedEntity 
-								actualValue: nil
-							).
-							self addDifference: diff.
-						].						
-					].
-
-					"addition case, not here in the model 1, but here in the model 2"
-					val2 do:[ :actualEntity |
-						| path allInBag|		
-						"check the path of the actual entity, if all the paths are not in the actual, so we have a addition"
-						path := self pathesForMaybeMultiRelation: actualEntity .
-						allInBag := (path allSatisfy: [ :p | expectedBag  includes: p]).
-						allInBag ifFalse: [ 
-							diff := (
-								FamixDiff
-								entity: otherFamixEntity
-								changeType: #entityAdded
-								expectedValue: nil
-								actualValue: actualEntity
-							).
-							self addDifference: diff.
-						].						
-					].
+				name1 := elt1 mooseName.
+				name2 := elt2 mooseName.
+				
+				name1 = name2 
+				"move forward both ptr"
+				ifTrue: [ 
+					stream1 next.
+					stream2 next.
+				]
+			
+				ifFalse: [ 
+					"deletion case"
+					name1 < name2 
+					ifTrue: [ 
+						diff := (FamixDiff entity: otherFamixEntity changeType: #entityRemoved expectedValue: elt1 actualValue: nil).
+						self addDifference: diff.
+						isEquals := false.
+						stream1 next. "ptr1++"
+					]
+					"addition case"	
+					ifFalse: [ 
+						diff := (FamixDiff entity: otherFamixEntity changeType: #entityAdded expectedValue: nil actualValue: elt2).
+						self addDifference: diff.
+						isEquals := false.
+						stream2 next."ptr2++"
+					]
 				].
+			].
+
+			"clear all deletion of stream1"
+			[ stream1 atEnd ] whileFalse: [
+				diff := (FamixDiff entity: otherFamixEntity changeType: #entityRemoved expectedValue: stream1 next actualValue: nil).
+				self addDifference: diff.
+				isEquals := false.
+			].
+		
+			"clear all addition of stream2"
+			[ stream2 atEnd ] whileFalse: [
+				diff := (FamixDiff entity: otherFamixEntity changeType: #entityAdded expectedValue: nil actualValue: stream2 next).
+				self addDifference: diff.
+				isEquals := false.
+			].
 		].
 	
 		^ isEquals.
