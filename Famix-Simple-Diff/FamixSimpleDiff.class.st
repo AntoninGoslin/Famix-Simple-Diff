@@ -24,7 +24,7 @@ FamixSimpleDiff >> clearRemainingAdditionOf: aStream target: anEntity [
 	
 	[ aStream atEnd ] 
 	whileFalse: [
-				diff := (FamixDiff entity: anEntity changeType: #entityAdded expectedValue: nil actualValue: aStream next).
+				diff := FamixDiff createEntityAdded: anEntity actualValue: aStream next. 
 				self addDifference: diff.
 				hasCleaned := true. "we added something"
 	].
@@ -39,7 +39,7 @@ FamixSimpleDiff >> clearRemainingDeletionOf: aStream target: anEntity [
 	
 	[ aStream atEnd ] 
 	whileFalse: [
-				diff := (FamixDiff entity: anEntity changeType: #entityRemoved expectedValue: aStream next actualValue: nil).
+				diff := FamixDiff createEntityRemoved: anEntity expectedValue: aStream next.
 				self addDifference: diff.
 				hasCleaned := true. "we deleted something"
 	].
@@ -55,7 +55,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
 	aFamixEntity class = otherFamixEntity class ifFalse: [ 
-		diff := (FamixDiff entity: otherFamixEntity changeType: #entityChanged expectedValue: aFamixEntity class name actualValue: otherFamixEntity class name).
+		diff := FamixDiff createEntityChanged: otherFamixEntity expectedValue: aFamixEntity class name actualValue: otherFamixEntity class name. 
 		self addDifference: diff.
 		^ self fail
 	].
@@ -69,7 +69,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 				prop1 := p read: aFamixEntity.
 				prop2 := p read: otherFamixEntity.
 				
-				diff := (FamixDiff entity: otherFamixEntity changeType: #propertyChanged expectedValue: prop1 actualValue: prop2).
+				diff := FamixDiff createPropertyChanged: otherFamixEntity expectedValue: prop1 actualValue: prop2.
 				self addDifference: diff.
 				isEquals := false 
 			] 
@@ -170,15 +170,15 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 			"deletion case"
 			name1 < name2 
 			ifTrue: [ 
-				diff := (FamixDiff entity: anEntity changeType: #entityRemoved expectedValue: elt1 actualValue: nil).
+				diff := FamixDiff createEntityRemoved: anEntity expectedValue: elt1.
 				self addDifference: diff.
 				isEquals := false.
 				stream1 next. "ptr1++"
 			]
 		
 			"addition case"	
-			ifFalse: [ 
-				diff := (FamixDiff entity: anEntity changeType: #entityAdded expectedValue: nil actualValue: elt2).
+			ifFalse: [
+				diff := FamixDiff createEntityAdded: anEntity actualValue: elt2.  
 				self addDifference: diff.
 				isEquals := false.
 				stream2 next."ptr2++"
@@ -200,7 +200,7 @@ FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
 	"if we dont have the same relations, so it changed, we have to record it"
 	areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
 	areSame ifFalse: [ 
-		diff := (FamixDiff entity: anEntity changeType: #relationChanged expectedValue: val1 actualValue: val2 ).
+		diff := FamixDiff createRelationChanged: anEntity expectedValue: val1 actualValue: val2.
 		self addDifference: diff.
 	].
 

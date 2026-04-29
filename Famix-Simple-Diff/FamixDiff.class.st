@@ -12,6 +12,51 @@ Class {
 }
 
 { #category : 'instance creation' }
+FamixDiff class >> createEntityAdded: anEntity actualValue: actualValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self entityAdded
+		expectedValue: nil 
+		actualValue: actualValue 
+]
+
+{ #category : 'instance creation' }
+FamixDiff class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self entityChanged 
+		expectedValue: expectedValue 
+		actualValue: actualValue
+]
+
+{ #category : 'instance creation' }
+FamixDiff class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self entityRemoved 
+		expectedValue: expectedValue 
+		actualValue: nil
+]
+
+{ #category : 'instance creation' }
+FamixDiff class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self propertyChanged 
+		expectedValue: expectedValue 
+		actualValue: actualValue 
+]
+
+{ #category : 'instance creation' }
+FamixDiff class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self relationChanged 
+		expectedValue: expectedValue 
+		actualValue: actualValue 
+]
+
+{ #category : 'instance creation' }
 FamixDiff class >> entity: anEntity changeType: aSymbol expectedValue: val1 actualValue: val2 [
 
 	| difference |
@@ -21,6 +66,31 @@ FamixDiff class >> entity: anEntity changeType: aSymbol expectedValue: val1 actu
 	difference expectedValue: val1.
 	difference actualValue: val2.
 	^ difference
+]
+
+{ #category : 'constants' }
+FamixDiff class >> entityAdded [
+	^ #entityAdded
+]
+
+{ #category : 'constants' }
+FamixDiff class >> entityChanged [
+	^ #entityChanged 
+]
+
+{ #category : 'constants' }
+FamixDiff class >> entityRemoved [
+	^ #entityRemoved
+]
+
+{ #category : 'constants' }
+FamixDiff class >> propertyChanged [ 
+	^ #propertyChanged 
+]
+
+{ #category : 'constants' }
+FamixDiff class >> relationChanged [ 
+	^ #relationChanged 
 ]
 
 { #category : 'accessing' }
