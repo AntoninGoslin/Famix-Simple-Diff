@@ -4,24 +4,58 @@ Class {
 	#instVars : [
 		'roots',
 		'childrenCache',
-		'debug'
+		'debug',
+		'differences'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'accessing' }
+FamixSimpleDiff >> addDifference: aFamixDiff [
+	differences add: aFamixDiff
+]
+
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
-	| properties relations |
-	aFamixEntity class = otherFamixEntity class ifFalse: [ ^ self fail ].
+	| properties relations diff isEquals |
+	isEquals := true.
+	
+	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
+	aFamixEntity class = otherFamixEntity class ifFalse: [ 
+		diff := (
+			FamixDiff 
+			entity: otherFamixEntity
+			changeType: #entityChanged
+			expectedValue: aFamixEntity class name 
+			actualValue: otherFamixEntity class name
+		).
+			
+		self addDifference: diff.
+		^ self fail
+	].
 
 	"Comparing properties (slots with non-famix values)"
 	properties := aFamixEntity class allSlots select: [ :slot |
 		              slot class = FMProperty ].
 	properties do: [ :p |
 			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
-				^ self fail ] ].
+				| prop1 prop2|
+				prop1 := p read: aFamixEntity.
+				prop2 := p read: otherFamixEntity.
+				
+				diff := (
+					FamixDiff 
+					entity: otherFamixEntity
+					changeType: #propertyChanged
+					expectedValue: prop1 
+					actualValue: prop2 
+				).
+				self addDifference: diff.
+				isEquals := false 
+			] 
+	].
 
 	"Comparing relations (slots with famix values)"
 	"We exclude source anchors because they are not relevant to model comparison"
@@ -29,8 +63,11 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 		             slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
-				ifFalse: [ ^ self fail ] ].
+				ifFalse: [ isEquals := false ] ].
 
+	"we stop the execution here if models are differents"
+	isEquals ifFalse: [ ^ self fail ].
+	
 	"Every slot value is equal, the entities are identical"
 	^ true
 ]
@@ -52,7 +89,9 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 { #category : 'comparing' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
 
-	| val1 val2 sortBlock |
+	| val1 val2 sortBlock isEquals diff|
+	isEquals := true.
+	
 	aFMRelationSlot isToOne
 		ifTrue: [
 				val1 := aFMRelationSlot read: aFamixEntity.
@@ -60,8 +99,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 		ifFalse: [
 				| rejectBlock |
 				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection.
-				val2 := (aFMRelationSlot read: otherFamixEntity)
-					        asOrderedCollection.
+				val2 := (aFMRelationSlot read: otherFamixEntity)asOrderedCollection.
 
 				sortBlock := val1
 					             ifEmpty: [ self sortBlock ]
@@ -80,19 +118,80 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	val1 == val2 ifTrue: [ ^ true ].
 
 	aFMRelationSlot isToOne
-		ifTrue: [ ^ (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2) ]
-		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
-				val1 size = val2 size ifFalse: [ ^ self fail ].
-				val1 := val1
+		ifTrue: [
+			| areSame | 
+			"if we dont have the same relations, so it changed, we have to record it"
+			areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+			areSame ifFalse: [ 
+				diff := (
+					FamixDiff 
+					entity: otherFamixEntity
+					changeType: #relationChanged
+					expectedValue: val1 
+					actualValue: val2 
+				).
+				self addDifference: diff.
+				isEquals := false.
+			]
+		]
+	
+		"This is a toMany Relation! and the value should be a collection"
+		ifFalse: [
+				
+				"if we have different sizes of val, here we have an addition or a deletion"
+				"val1 size = val2 size ifFalse: [ ^ self fail ]."
+				
+				| expectedBag actualBag|
+				expectedBag := val1
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
-				val2 := val2
+				actualBag := val2
 					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
 					        as: Bag.
 
-				val1 = val2
-					ifFalse: [ ^ self fail ]
-					ifTrue: [ ^ true ] ]
+				"compute additions and deletion between bags"
+				 expectedBag = actualBag ifFalse: [ 
+					isEquals := false.
+					
+					"deletion case, here in the model 1, but not in model 2"
+					val1 do:[ :expectedEntity |
+						| path allInBag|		
+						"check the path of the expected entity, if all the paths are not in the expectedBag, so we have a deletion"
+						path := self pathesForMaybeMultiRelation: expectedEntity.
+						allInBag := (path allSatisfy: [ :p | actualBag  includes: p]).
+						allInBag ifFalse: [ 
+							diff := (
+								FamixDiff 
+								entity: otherFamixEntity
+								changeType: #entityRemoved
+								expectedValue: expectedEntity 
+								actualValue: nil
+							).
+							self addDifference: diff.
+						].						
+					].
+
+					"addition case, not here in the model 1, but here in the model 2"
+					val2 do:[ :actualEntity |
+						| path allInBag|		
+						"check the path of the actual entity, if all the paths are not in the actual, so we have a addition"
+						path := self pathesForMaybeMultiRelation: actualEntity .
+						allInBag := (path allSatisfy: [ :p | expectedBag  includes: p]).
+						allInBag ifFalse: [ 
+							diff := (
+								FamixDiff
+								entity: otherFamixEntity
+								changeType: #entityAdded
+								expectedValue: nil
+								actualValue: actualEntity
+							).
+							self addDifference: diff.
+						].						
+					].
+				].
+		].
+	
+		^ isEquals.
 ]
 
 { #category : 'path-computing' }
@@ -125,6 +224,11 @@ FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 FamixSimpleDiff >> debugOn [
 
 	debug := true
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> differences [
+	^ differences
 ]
 
 { #category : 'path-computing' }
@@ -178,7 +282,8 @@ FamixSimpleDiff >> initialize [
 	
 	super initialize.
 	debug := false.
-	childrenCache := LRUCache new maximumWeight: 100
+	childrenCache := LRUCache new maximumWeight: 100.
+	differences := OrderedCollection new.
 ]
 
 { #category : 'path-computing' }
