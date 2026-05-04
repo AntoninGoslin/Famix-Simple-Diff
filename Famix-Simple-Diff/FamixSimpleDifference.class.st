@@ -29,7 +29,7 @@ FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expe
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
+FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: expectedValue [ 
 	^ FamixSimpleDifferenceEntityDeletion new
 		entity: anEntity;
 		expectedValue: expectedValue;

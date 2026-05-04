@@ -39,7 +39,7 @@ FamixSimpleDiff >> clearRemainingDeletionOf: aStream target: anEntity [
 	
 	[ aStream atEnd ] 
 	whileFalse: [
-				diff := FamixSimpleDifference createEntityRemoved: anEntity expectedValue: aStream next.
+				diff := FamixSimpleDifference createEntityDeletion: anEntity expectedValue: aStream next.
 				self addDifference: diff.
 				hasCleaned := true. "we deleted something"
 	].
@@ -177,7 +177,7 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 			"deletion case"
 			name1 < name2 
 			ifTrue: [ 
-				diff := FamixSimpleDifference createEntityRemoved: anEntity expectedValue: elt1.
+				diff := FamixSimpleDifference createEntityDeletion: anEntity expectedValue: elt1.
 				self addDifference: diff.
 				isEquals := false.
 				stream1 next. "ptr1++"
