@@ -85,11 +85,11 @@ FamixSimpleDiffTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeClean
 	diff := sd differences.
 	
 	self assert: diff first changeType equals: FamixSimpleDifference entityAdded.
-	self assert: diff first expectedValue equals: nil.
+	self assert: diff first expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff first actualValue name equals: 'methodB'.
 	
 	self assert: diff second changeType equals: FamixSimpleDifference entityAdded.
-	self assert: diff second expectedValue equals: nil.
+	self assert: diff first expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff second actualValue name equals: 'methodC'.
 ]
 
