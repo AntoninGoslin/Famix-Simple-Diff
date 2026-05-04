@@ -246,7 +246,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 		
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: FamixSimpleDifference entityAdded.
+	self assert: diff class equals: FamixSimpleDifferenceEntityAddition.
 	self assert: diff expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff actualValue name equals: 'newMethod'.
 ]
