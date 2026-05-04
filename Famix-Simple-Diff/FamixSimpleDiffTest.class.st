@@ -174,7 +174,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 	
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: FamixSimpleDifference entityChanged.
+	self assert: diff class equals: FamixSimpleDifferenceEntityChanged.
 	self assert: diff expectedValue equals: 'FamixJavaClass'.
 	self assert: diff actualValue equals: 'FamixJavaMethod'.
 	
