@@ -117,7 +117,7 @@ FamixSimpleDifference >> printOn: aStream [
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
-	aStream print: changeType.
+	aStream nextPutAll: self changeTypeName.
 	
 	aStream 
 		nextPutAll: ' -> Expected: '; 
