@@ -1,5 +1,5 @@
 Class {
-	#name : 'FamixDiff',
+	#name : 'FamixSimpleDifference',
 	#superclass : 'Object',
 	#instVars : [
 		'entity',
@@ -12,7 +12,7 @@ Class {
 }
 
 { #category : 'instance creation' }
-FamixDiff class >> createEntityAdded: anEntity actualValue: actualValue [ 
+FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualValue [ 
 	^ self 
 		entity: anEntity 
 		changeType: self entityAdded
@@ -21,7 +21,7 @@ FamixDiff class >> createEntityAdded: anEntity actualValue: actualValue [
 ]
 
 { #category : 'instance creation' }
-FamixDiff class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
 	^ self 
 		entity: anEntity 
 		changeType: self entityChanged 
@@ -30,7 +30,7 @@ FamixDiff class >> createEntityChanged: anEntity expectedValue: expectedValue ac
 ]
 
 { #category : 'instance creation' }
-FamixDiff class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
+FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
 	^ self 
 		entity: anEntity 
 		changeType: self entityRemoved 
@@ -39,7 +39,7 @@ FamixDiff class >> createEntityRemoved: anEntity expectedValue: expectedValue [
 ]
 
 { #category : 'instance creation' }
-FamixDiff class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+FamixSimpleDifference class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
 	^ self 
 		entity: anEntity 
 		changeType: self propertyChanged 
@@ -48,7 +48,7 @@ FamixDiff class >> createPropertyChanged: anEntity expectedValue: expectedValue 
 ]
 
 { #category : 'instance creation' }
-FamixDiff class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+FamixSimpleDifference class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
 	^ self 
 		entity: anEntity 
 		changeType: self relationChanged 
@@ -57,10 +57,10 @@ FamixDiff class >> createRelationChanged: anEntity expectedValue: expectedValue 
 ]
 
 { #category : 'instance creation' }
-FamixDiff class >> entity: anEntity changeType: aSymbol expectedValue: val1 actualValue: val2 [
+FamixSimpleDifference class >> entity: anEntity changeType: aSymbol expectedValue: val1 actualValue: val2 [
 
 	| difference |
-	difference := FamixDiff new.
+	difference := FamixSimpleDifference new.
 	difference entity: anEntity.
 	difference changeType: aSymbol.
 	difference expectedValue: val1.
@@ -69,80 +69,80 @@ FamixDiff class >> entity: anEntity changeType: aSymbol expectedValue: val1 actu
 ]
 
 { #category : 'constants' }
-FamixDiff class >> entityAdded [
+FamixSimpleDifference class >> entityAdded [
 	^ #entityAdded
 ]
 
 { #category : 'constants' }
-FamixDiff class >> entityChanged [
+FamixSimpleDifference class >> entityChanged [
 	^ #entityChanged 
 ]
 
 { #category : 'constants' }
-FamixDiff class >> entityRemoved [
+FamixSimpleDifference class >> entityRemoved [
 	^ #entityRemoved
 ]
 
 { #category : 'constants' }
-FamixDiff class >> propertyChanged [ 
+FamixSimpleDifference class >> propertyChanged [ 
 	^ #propertyChanged 
 ]
 
 { #category : 'constants' }
-FamixDiff class >> relationChanged [ 
+FamixSimpleDifference class >> relationChanged [ 
 	^ #relationChanged 
 ]
 
 { #category : 'accessing' }
-FamixDiff >> actualValue [
+FamixSimpleDifference >> actualValue [
 
 	^ actualValue
 ]
 
 { #category : 'accessing' }
-FamixDiff >> actualValue: anObject [
+FamixSimpleDifference >> actualValue: anObject [
 
 	actualValue := anObject
 ]
 
 { #category : 'accessing' }
-FamixDiff >> changeType [
+FamixSimpleDifference >> changeType [
 
 	^ changeType
 ]
 
 { #category : 'accessing' }
-FamixDiff >> changeType: anObject [
+FamixSimpleDifference >> changeType: anObject [
 
 	changeType := anObject
 ]
 
 { #category : 'accessing' }
-FamixDiff >> entity [
+FamixSimpleDifference >> entity [
 
 	^ entity
 ]
 
 { #category : 'accessing' }
-FamixDiff >> entity: anObject [
+FamixSimpleDifference >> entity: anObject [
 
 	entity := anObject
 ]
 
 { #category : 'accessing' }
-FamixDiff >> expectedValue [
+FamixSimpleDifference >> expectedValue [
 
 	^ expectedValue
 ]
 
 { #category : 'accessing' }
-FamixDiff >> expectedValue: anObject [
+FamixSimpleDifference >> expectedValue: anObject [
 
 	expectedValue := anObject
 ]
 
 { #category : 'printing' }
-FamixDiff >> printOn: aStream [
+FamixSimpleDifference >> printOn: aStream [
 	"Redifine the display of the FamixDiff class"
 
 	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
