@@ -142,6 +142,13 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
+	"We use two pointer to browse the differences of the model using Moose name. val1 and val2 must be sorted collections.
+	- If the name are identical, we advance both pointers.
+	- If name1 < name2, so its a deletion (pointer1 go forward).
+	- If name1 > name2, so its an addition (pointer2 go forward).
+	If one stream is empty, we finish the remaining additions/ deletions.
+	Return true if models are equals, false otherwise.
+	"
 	| stream1 stream2 isEquals diff|
 	isEquals := true.
 	
