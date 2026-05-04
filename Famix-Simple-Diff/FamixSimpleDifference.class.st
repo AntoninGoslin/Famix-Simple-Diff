@@ -16,7 +16,7 @@ FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualVa
 	^ self 
 		entity: anEntity 
 		changeType: self entityAdded
-		expectedValue: nil 
+		expectedValue: FamixSimpleDifferenceNullValue new
 		actualValue: actualValue 
 ]
 
@@ -35,7 +35,7 @@ FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expe
 		entity: anEntity 
 		changeType: self entityRemoved 
 		expectedValue: expectedValue 
-		actualValue: nil
+		actualValue: FamixSimpleDifferenceNullValue new
 ]
 
 { #category : 'instance creation' }
