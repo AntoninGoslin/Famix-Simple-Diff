@@ -278,17 +278,9 @@ FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
-	|  modelsAreDifferents diff |
-	modelsAreDifferents := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixSimpleDifference createEntityAdded: anEntity actualValue: aStream next. 
-				self addDifference: diff.
-				modelsAreDifferents := true. "we added something"
-	].
 
-	^ modelsAreDifferents.
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityAdded: anEntity actualValue: val ]
 ]
 
 { #category : 'accessing' }
