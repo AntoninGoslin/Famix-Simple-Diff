@@ -127,11 +127,11 @@ FamixSimpleDiffTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCl
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: FamixSimpleDifference entityRemoved.
+	self assert: diff first class equals: FamixSimpleDifferenceEntityDeletion.
 	self assert: diff first expectedValue name equals: 'methodB'.
 	self assert: diff first actualValue class equals: FamixSimpleDifferenceNullValue.
 	
-	self assert: diff second changeType equals: FamixSimpleDifference entityRemoved.
+	self assert: diff second class equals: FamixSimpleDifferenceEntityDeletion.
 	self assert: diff second expectedValue name equals: 'methodC'.
 	self assert: diff second actualValue class equals: FamixSimpleDifferenceNullValue.
 ]
