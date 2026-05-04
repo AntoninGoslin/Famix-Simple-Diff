@@ -285,17 +285,9 @@ FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
-	|  modelsAreDifferents diff |
-	modelsAreDifferents := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixSimpleDifference createEntityRemoved: anEntity expectedValue: aStream next.
-				self addDifference: diff.
-				modelsAreDifferents := true. "we deleted something"
-	].
 
-	^ modelsAreDifferents.
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityRemoved: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }
