@@ -262,6 +262,21 @@ FamixSimpleDiff >> fail [
 ]
 
 { #category : 'accessing' }
+FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
+	|  modelsAreDifferents diff |
+	modelsAreDifferents := false.
+	
+	[ aStream atEnd ] 
+	whileFalse: [
+				diff := aDifferenceCreation value: aStream next.
+				self addDifference: diff.
+				modelsAreDifferents := true.
+	].
+
+	^ modelsAreDifferents.
+]
+
+{ #category : 'accessing' }
 FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 	|  modelsAreDifferents diff |
 	modelsAreDifferents := false.
