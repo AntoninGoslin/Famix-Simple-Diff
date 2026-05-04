@@ -12,47 +12,47 @@ Class {
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityAdded
-		expectedValue: FamixSimpleDifferenceNullValue new
-		actualValue: actualValue 
+	^ FamixSimpleDifferenceEntityAddition new
+		entity: anEntity;
+		expectedValue: FamixSimpleDifferenceNullValue new;
+		actualValue: actualValue;
+		yourself
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityChanged 
-		expectedValue: expectedValue 
-		actualValue: actualValue
+	^ FamixSimpleDifferenceEntityChanged new
+		entity: anEntity; 
+		expectedValue: expectedValue;
+		actualValue: actualValue;
+		yourself 
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityRemoved 
-		expectedValue: expectedValue 
-		actualValue: FamixSimpleDifferenceNullValue new
+	^ FamixSimpleDifferenceEntityDeletion new
+		entity: anEntity;
+		expectedValue: expectedValue;
+		actualValue: FamixSimpleDifferenceNullValue new;
+		yourself 
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self propertyChanged 
-		expectedValue: expectedValue 
-		actualValue: actualValue 
+	^ FamixSimpleDifferencePropertyChanged new
+		entity: anEntity; 
+		expectedValue: expectedValue;
+		actualValue: actualValue;
+		yourself 
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self relationChanged 
-		expectedValue: expectedValue 
-		actualValue: actualValue 
+	^ FamixSimpleDifferenceRelationChanged new
+		entity: anEntity;
+		expectedValue: expectedValue;
+		actualValue: actualValue;
+		yourself
 ]
 
 { #category : 'instance creation' }
