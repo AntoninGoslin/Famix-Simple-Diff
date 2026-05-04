@@ -17,36 +17,6 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 	differences add: aFamixDiff
 ]
 
-{ #category : 'accessing' }
-FamixSimpleDiff >> clearRemainingAdditionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixDiff createEntityAdded: anEntity actualValue: aStream next. 
-				self addDifference: diff.
-				hasCleaned := true. "we added something"
-	].
-
-	^ hasCleaned.
-]
-
-{ #category : 'accessing' }
-FamixSimpleDiff >> clearRemainingDeletionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixDiff createEntityRemoved: anEntity expectedValue: aStream next.
-				self addDifference: diff.
-				hasCleaned := true. "we deleted something"
-	].
-
-	^ hasCleaned.
-]
-
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
@@ -187,8 +157,8 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	].
 
 	"cleaning end of pointers, checking if they have clean something"
-	(self clearRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
-	(self clearRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
+	(self finishRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
+	(self finishRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
 	
 	^ isEquals 
 ]
@@ -288,6 +258,36 @@ FamixSimpleDiff >> fail [
 
 	debug ifTrue: [ self halt ].
 	^ false
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
+	|  hasCleaned diff |
+	hasCleaned := false.
+	
+	[ aStream atEnd ] 
+	whileFalse: [
+				diff := FamixDiff createEntityAdded: anEntity actualValue: aStream next. 
+				self addDifference: diff.
+				hasCleaned := true. "we added something"
+	].
+
+	^ hasCleaned.
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
+	|  hasCleaned diff |
+	hasCleaned := false.
+	
+	[ aStream atEnd ] 
+	whileFalse: [
+				diff := FamixDiff createEntityRemoved: anEntity expectedValue: aStream next.
+				self addDifference: diff.
+				hasCleaned := true. "we deleted something"
+	].
+
+	^ hasCleaned.
 ]
 
 { #category : 'initialization' }
