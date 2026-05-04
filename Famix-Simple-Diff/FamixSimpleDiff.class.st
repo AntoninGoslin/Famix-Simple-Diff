@@ -157,6 +157,7 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	].
 
 	"cleaning end of pointers, checking if they have clean something"
+	"if they have deleted/added something, so the models are not equals"
 	(self finishRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
 	(self finishRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
 	
@@ -262,32 +263,32 @@ FamixSimpleDiff >> fail [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
+	|  modelsAreDifferents diff |
+	modelsAreDifferents := false.
 	
 	[ aStream atEnd ] 
 	whileFalse: [
 				diff := FamixDiff createEntityAdded: anEntity actualValue: aStream next. 
 				self addDifference: diff.
-				hasCleaned := true. "we added something"
+				modelsAreDifferents := true. "we added something"
 	].
 
-	^ hasCleaned.
+	^ modelsAreDifferents.
 ]
 
 { #category : 'accessing' }
 FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
+	|  modelsAreDifferents diff |
+	modelsAreDifferents := false.
 	
 	[ aStream atEnd ] 
 	whileFalse: [
 				diff := FamixDiff createEntityRemoved: anEntity expectedValue: aStream next.
 				self addDifference: diff.
-				hasCleaned := true. "we deleted something"
+				modelsAreDifferents := true. "we deleted something"
 	].
 
-	^ hasCleaned.
+	^ modelsAreDifferents.
 ]
 
 { #category : 'initialization' }
