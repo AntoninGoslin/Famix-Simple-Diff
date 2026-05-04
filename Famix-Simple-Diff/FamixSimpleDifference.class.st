@@ -3,7 +3,6 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'entity',
-		'changeType',
 		'expectedValue',
 		'actualValue'
 	],
@@ -68,31 +67,6 @@ FamixSimpleDifference class >> entity: anEntity changeType: aSymbol expectedValu
 	^ difference
 ]
 
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityAdded [
-	^ #entityAdded
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityChanged [
-	^ #entityChanged 
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityRemoved [
-	^ #entityRemoved
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> propertyChanged [ 
-	^ #propertyChanged 
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> relationChanged [ 
-	^ #relationChanged 
-]
-
 { #category : 'accessing' }
 FamixSimpleDifference >> actualValue [
 
@@ -103,18 +77,6 @@ FamixSimpleDifference >> actualValue [
 FamixSimpleDifference >> actualValue: anObject [
 
 	actualValue := anObject
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> changeType [
-
-	^ changeType
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> changeType: anObject [
-
-	changeType := anObject
 ]
 
 { #category : 'accessing' }
