@@ -80,6 +80,12 @@ FamixSimpleDifference >> actualValue: anObject [
 ]
 
 { #category : 'accessing' }
+FamixSimpleDifference >> changeTypeName [
+	"the name have to be defined by the subclass"
+	^ self subclassResponsibility 
+]
+
+{ #category : 'accessing' }
 FamixSimpleDifference >> entity [
 
 	^ entity
