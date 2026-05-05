@@ -30,6 +30,14 @@ FamixSimpleDifferenceTest >> testChangeTypeNameEntityDeletion [
 ]
 
 { #category : 'tests' }
+FamixSimpleDifferenceTest >> testChangeTypeNamePropertyChanged [
+	| propertyChanged |
+	propertyChanged := FamixSimpleDifference createPropertyChanged: 'Entity' expectedValue: 'Expected' actualValue: 'Actual'.
+	
+	self assert: propertyChanged changeTypeName equals: 'Property Changed'.
+]
+
+{ #category : 'tests' }
 FamixSimpleDifferenceTest >> testInstanceCreation [
 	| difference expectedValue actualValue |
 	
