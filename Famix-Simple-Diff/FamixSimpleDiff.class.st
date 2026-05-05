@@ -139,14 +139,14 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 
 	"looking the streams"
 	[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [
-			| elt1 elt2 name1 name2 |
+			| element1 element2 name1 name2 |
 			
 			"setup name"
-			elt1 := stream1 peek.
-			elt2 := stream2 peek.
+			element1 := stream1 peek.
+			element2 := stream2 peek.
 
-			name1 := elt1 mooseName.
-			name2 := elt2 mooseName.
+			name1 := element1 mooseName.
+			name2 := element2 mooseName.
 
 			name1 = name2
 				ifTrue: ["move forward both ptr if identicals"
@@ -157,7 +157,7 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 							ifTrue: ["deletion case"
 									diff := FamixSimpleDifference
 										        createEntityDeletion: anEntity
-										        expectedValue: elt1.
+										        expectedValue: element1.
 									self addDifference: diff.
 									isEquals := false.
 									stream1 next "ptr1++" ]
@@ -165,7 +165,7 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 							ifFalse: ["addition case"
 									diff := FamixSimpleDifference
 										        createEntityAdded: anEntity
-										        actualValue: elt2.
+										        actualValue: element2.
 									self addDifference: diff.
 									isEquals := false.
 									stream2 next "ptr2++" ] ] ].
