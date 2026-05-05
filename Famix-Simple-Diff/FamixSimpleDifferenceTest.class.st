@@ -38,6 +38,14 @@ FamixSimpleDifferenceTest >> testChangeTypeNamePropertyChanged [
 ]
 
 { #category : 'tests' }
+FamixSimpleDifferenceTest >> testChangeTypeNameRelationChanged [
+	| relationChanged |
+	relationChanged := FamixSimpleDifference createRelationChanged: 'Entity' expectedValue: 'Expected' actualValue: 'Actual'.
+	
+	self assert: relationChanged changeTypeName equals: 'Relation Changed'.
+]
+
+{ #category : 'tests' }
 FamixSimpleDifferenceTest >> testInstanceCreation [
 	| difference expectedValue actualValue |
 	
