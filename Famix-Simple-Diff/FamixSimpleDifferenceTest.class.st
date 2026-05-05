@@ -64,3 +64,13 @@ FamixSimpleDifferenceTest >> testInstanceCreation [
 	self assert: difference expectedValue equals: expectedValue.
 	self assert: difference actualValue equals: actualValue.
 ]
+
+{ #category : 'accessing' }
+FamixSimpleDifferenceTest >> testNullValues [
+	| nullPattern |
+	nullPattern := FamixSimpleDifferenceNullValue new.
+	
+	self assert: nullPattern name equals: 'Nothing'. 
+	self assert: nullPattern mooseName equals: 'Nothing'.
+	self assert: nullPattern printString equals: 'Nothing'. 
+]
