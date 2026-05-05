@@ -13,7 +13,6 @@ Class {
 
 { #category : 'accessing' }
 FamixSimpleDiff >> addDifference: aFamixDiff [
-	"1halt."
 	differences add: aFamixDiff
 ]
 
@@ -105,8 +104,6 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 
 	^ aFMRelationSlot isToOne
 		ifTrue: [ self compareToOneRelation: val1 actual: val2 target: otherFamixEntity ]
-	
-		"This is a toMany Relation! and the value should be a collection"
 		ifFalse: [ self compareToManyRelation: val1 actual: val2  target: otherFamixEntity ]
 ]
 
