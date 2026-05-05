@@ -6,6 +6,14 @@ Class {
 }
 
 { #category : 'tests' }
+FamixSimpleDifferenceTest >> testChangeTypeNameEntityAddition [
+	| entityAddition |
+	entityAddition := FamixSimpleDifference createEntityAdded: 'Entity' actualValue: 'Actual'.
+	
+	self assert: entityAddition changeTypeName equals: 'Entity Addition'.
+]
+
+{ #category : 'tests' }
 FamixSimpleDifferenceTest >> testInstanceCreation [
 	| difference expectedValue actualValue |
 	
