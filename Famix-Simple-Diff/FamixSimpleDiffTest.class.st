@@ -390,6 +390,16 @@ FamixSimpleDiffTest >> testCorrespondingPrimitiveTypesAreEqual [
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testDebugIsOn [
+	| sd |
+	sd := FamixSimpleDiff new.
+	sd debugOn.
+	
+	"debug mode should be activated"
+	self assert: (sd instVarNamed: 'debug').
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testDifferenceDetectedWhenToOneRelationChanged [
 
     | sd class1 class2 model1 model2 diff method1 method2 |
@@ -418,7 +428,7 @@ FamixSimpleDiffTest >> testDifferenceDetectedWhenToOneRelationChanged [
 
     diff := sd differences.
 
-    self assert: diff first changeType equals:  FamixSimpleDifference relationChanged.
+    self assert: diff first class equals: FamixSimpleDifferenceRelationChanged.
     self assert: diff first expectedValue equals: class1.
     self assert: diff first actualValue equals: class2
 ]
