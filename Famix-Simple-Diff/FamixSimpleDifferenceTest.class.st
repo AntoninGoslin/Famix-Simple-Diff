@@ -14,6 +14,14 @@ FamixSimpleDifferenceTest >> testChangeTypeNameEntityAddition [
 ]
 
 { #category : 'tests' }
+FamixSimpleDifferenceTest >> testChangeTypeNameEntityDeletion [
+	| entityDeletion |
+	entityDeletion := FamixSimpleDifference createEntityDeletion: 'Entity' expectedValue: 'Expected'.
+	
+	self assert: entityDeletion changeTypeName equals: 'Entity Deletion'.
+]
+
+{ #category : 'tests' }
 FamixSimpleDifferenceTest >> testInstanceCreation [
 	| difference expectedValue actualValue |
 	
