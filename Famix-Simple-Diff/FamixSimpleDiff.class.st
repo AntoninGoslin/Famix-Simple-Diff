@@ -180,16 +180,18 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
-	| areSame diff | 
 
+	| areEquals diff |
 	"if we dont have the same relations, so it changed, we have to record it"
-	areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
-	areSame ifFalse: [ 
-		diff := FamixSimpleDifference createRelationChanged: anEntity expectedValue: val1 actualValue: val2.
-		self addDifference: diff.
-	].
+	areEquals := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+	areEquals ifFalse: [
+			diff := FamixSimpleDifference
+				        createRelationChanged: anEntity
+				        expectedValue: val1
+				        actualValue: val2.
+			self addDifference: diff ].
 
-	^ areSame "if they are not the same, so they are not equals"
+	^ areEquals
 ]
 
 { #category : 'path-computing' }
