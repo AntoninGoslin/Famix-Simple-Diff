@@ -217,7 +217,6 @@ FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 	| path |
 	path := self pathOfEntity: entity.
 	^ self entityAtPath: path inModel: model
-	
 ]
 
 { #category : 'debug' }
@@ -228,6 +227,7 @@ FamixSimpleDiff >> debugOn [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> differences [
+
 	^ differences
 ]
 
@@ -245,7 +245,6 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
 	| rootEntity |
-	
 	rootEntity := (self entityRoots: model) at: indexPath first.
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
 ]
@@ -279,17 +278,16 @@ FamixSimpleDiff >> fail [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
-	|  modelsAreDifferents diff |
-	modelsAreDifferents := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := aDifferenceCreation value: aStream next.
-				self addDifference: diff.
-				modelsAreDifferents := true.
-	].
 
-	^ modelsAreDifferents.
+	| modelsAreDifferents diff |
+	modelsAreDifferents := false.
+
+	[ aStream atEnd ] whileFalse: [
+			diff := aDifferenceCreation value: aStream next.
+			self addDifference: diff.
+			modelsAreDifferents := true ].
+
+	^ modelsAreDifferents
 ]
 
 { #category : 'accessing' }
@@ -303,16 +301,16 @@ FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
 
 	^ self finishRemaining: aStream diffCreation: [ :val |
-		  FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
+			FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }
 FamixSimpleDiff >> initialize [
-	
+
 	super initialize.
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
-	differences := OrderedCollection new.
+	differences := OrderedCollection new
 ]
 
 { #category : 'path-computing' }
@@ -401,7 +399,7 @@ FamixSimpleDiff >> sortedChildren: entity [
 												       ifNotNil: [ "case for two entities with identical printing string but different source anchor (several inner classes in the same parent for example)"
 													       a sourceAnchor endPos < b sourceAnchor endPos ]
 												       ifNil: [ valA < valB ] ]
-									       ifNil: [ valA < valB] ]
+									       ifNil: [ valA < valB ] ]
 						       ifFalse: [ valA < valB ] ] ].
 
 
