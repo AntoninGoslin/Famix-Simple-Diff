@@ -3,7 +3,6 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'entity',
-		'changeType',
 		'expectedValue',
 		'actualValue'
 	],
@@ -13,84 +12,47 @@ Class {
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityAdded
-		expectedValue: nil 
-		actualValue: actualValue 
+	^ FamixSimpleDifferenceEntityAddition new
+		entity: anEntity;
+		expectedValue: FamixSimpleDifferenceNullValue new;
+		actualValue: actualValue;
+		yourself
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityChanged 
-		expectedValue: expectedValue 
-		actualValue: actualValue
+	^ FamixSimpleDifferenceEntityChanged new
+		entity: anEntity; 
+		expectedValue: expectedValue;
+		actualValue: actualValue;
+		yourself 
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityRemoved 
-		expectedValue: expectedValue 
-		actualValue: nil
+FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: expectedValue [ 
+	^ FamixSimpleDifferenceEntityDeletion new
+		entity: anEntity;
+		expectedValue: expectedValue;
+		actualValue: FamixSimpleDifferenceNullValue new;
+		yourself 
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self propertyChanged 
-		expectedValue: expectedValue 
-		actualValue: actualValue 
+	^ FamixSimpleDifferencePropertyChanged new
+		entity: anEntity; 
+		expectedValue: expectedValue;
+		actualValue: actualValue;
+		yourself 
 ]
 
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self relationChanged 
-		expectedValue: expectedValue 
-		actualValue: actualValue 
-]
-
-{ #category : 'instance creation' }
-FamixSimpleDifference class >> entity: anEntity changeType: aSymbol expectedValue: val1 actualValue: val2 [
-
-	| difference |
-	difference := FamixSimpleDifference new.
-	difference entity: anEntity.
-	difference changeType: aSymbol.
-	difference expectedValue: val1.
-	difference actualValue: val2.
-	^ difference
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityAdded [
-	^ #entityAdded
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityChanged [
-	^ #entityChanged 
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityRemoved [
-	^ #entityRemoved
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> propertyChanged [ 
-	^ #propertyChanged 
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> relationChanged [ 
-	^ #relationChanged 
+	^ FamixSimpleDifferenceRelationChanged new
+		entity: anEntity;
+		expectedValue: expectedValue;
+		actualValue: actualValue;
+		yourself
 ]
 
 { #category : 'accessing' }
@@ -106,15 +68,9 @@ FamixSimpleDifference >> actualValue: anObject [
 ]
 
 { #category : 'accessing' }
-FamixSimpleDifference >> changeType [
-
-	^ changeType
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> changeType: anObject [
-
-	changeType := anObject
+FamixSimpleDifference >> changeTypeName [
+	"the name have to be defined by the subclass"
+	^ self subclassResponsibility 
 ]
 
 { #category : 'accessing' }
@@ -147,7 +103,7 @@ FamixSimpleDifference >> printOn: aStream [
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
-	aStream print: changeType.
+	aStream print: self changeTypeName.
 	
 	aStream 
 		nextPutAll: ' -> Expected: '; 

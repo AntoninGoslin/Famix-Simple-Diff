@@ -14,14 +14,13 @@ FamixSimpleDifferenceTest >> testInstanceCreation [
 	actualValue := 'private int age;'.
 	
 	difference := FamixSimpleDifference 
-						entity: 'testEntity' 
-						changeType: #entityModification
+						createEntityChanged: 'testEntity' 
 						expectedValue: expectedValue 
 						actualValue: actualValue.
 						
 	"checking instance creation"
 	self assert: difference entity equals: 'testEntity'.
-	self assert: difference changeType equals: #entityModification.
+	self assert: difference class equals: FamixSimpleDifferenceEntityChanged.
 	self assert: difference expectedValue equals: expectedValue.
 	self assert: difference actualValue equals: actualValue.
 ]
