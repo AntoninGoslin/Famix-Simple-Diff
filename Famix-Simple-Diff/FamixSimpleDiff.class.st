@@ -16,36 +16,6 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 	differences add: aFamixDiff
 ]
 
-{ #category : 'accessing' }
-FamixSimpleDiff >> clearRemainingAdditionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixSimpleDifference createEntityAdded: anEntity actualValue: aStream next. 
-				self addDifference: diff.
-				hasCleaned := true. "we added something"
-	].
-
-	^ hasCleaned.
-]
-
-{ #category : 'accessing' }
-FamixSimpleDiff >> clearRemainingDeletionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixSimpleDifference createEntityRemoved: anEntity expectedValue: aStream next.
-				self addDifference: diff.
-				hasCleaned := true. "we deleted something"
-	].
-
-	^ hasCleaned.
-]
-
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
@@ -139,13 +109,6 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
-	"We use two pointer to browse the differences of the model using Moose name. val1 and val2 must be sorted collections.
-	- If the name are identical, we advance both pointers.
-	- If name1 < name2, so its a deletion (pointer1 go forward).
-	- If name1 > name2, so its an addition (pointer2 go forward).
-	If one stream is empty, we finish the remaining additions/ deletions.
-	Return true if models are equals, false otherwise.
-	"
 	| stream1 stream2 isEquals diff|
 	isEquals := true.
 	
@@ -191,24 +154,25 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	].
 
 	"cleaning end of pointers, checking if they have clean something"
-	(self clearRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
-	(self clearRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
+	"if they have deleted/added something, so the models are not equals"
+	(self finishRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
+	(self finishRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
 	
 	^ isEquals 
 ]
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
-	| areEquals diff | 
+	| areSame diff | 
 
-	"if the relations are not equals, we have a change, so we have to record it"
-	areEquals := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
-	areEquals ifFalse: [ 
+	"if we dont have the same relations, so it changed, we have to record it"
+	areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+	areSame ifFalse: [ 
 		diff := FamixSimpleDifference createRelationChanged: anEntity expectedValue: val1 actualValue: val2.
 		self addDifference: diff.
 	].
 
-	^ areEquals
+	^ areSame "if they are not the same, so they are not equals"
 ]
 
 { #category : 'path-computing' }
@@ -292,6 +256,35 @@ FamixSimpleDiff >> fail [
 
 	debug ifTrue: [ self halt ].
 	^ false
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
+	|  modelsAreDifferents diff |
+	modelsAreDifferents := false.
+	
+	[ aStream atEnd ] 
+	whileFalse: [
+				diff := aDifferenceCreation value: aStream next.
+				self addDifference: diff.
+				modelsAreDifferents := true.
+	].
+
+	^ modelsAreDifferents.
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
+
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityAdded: anEntity actualValue: val ]
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
+
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityRemoved: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }
