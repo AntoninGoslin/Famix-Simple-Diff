@@ -13,38 +13,7 @@ Class {
 
 { #category : 'accessing' }
 FamixSimpleDiff >> addDifference: aFamixDiff [
-	"1halt."
 	differences add: aFamixDiff
-]
-
-{ #category : 'accessing' }
-FamixSimpleDiff >> clearRemainingAdditionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixSimpleDifference createEntityAdded: anEntity actualValue: aStream next. 
-				self addDifference: diff.
-				hasCleaned := true. "we added something"
-	].
-
-	^ hasCleaned.
-]
-
-{ #category : 'accessing' }
-FamixSimpleDiff >> clearRemainingDeletionOf: aStream target: anEntity [
-	|  hasCleaned diff |
-	hasCleaned := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := FamixSimpleDifference createEntityDeletion: anEntity expectedValue: aStream next.
-				self addDifference: diff.
-				hasCleaned := true. "we deleted something"
-	].
-
-	^ hasCleaned.
 ]
 
 { #category : 'comparing' }
@@ -135,8 +104,6 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 
 	^ aFMRelationSlot isToOne
 		ifTrue: [ self compareToOneRelation: val1 actual: val2 target: otherFamixEntity ]
-	
-		"This is a toMany Relation! and the value should be a collection"
 		ifFalse: [ self compareToManyRelation: val1 actual: val2  target: otherFamixEntity ]
 ]
 
@@ -295,6 +262,35 @@ FamixSimpleDiff >> fail [
 
 	debug ifTrue: [ self halt ].
 	^ false
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
+	|  modelsAreDifferents diff |
+	modelsAreDifferents := false.
+	
+	[ aStream atEnd ] 
+	whileFalse: [
+				diff := aDifferenceCreation value: aStream next.
+				self addDifference: diff.
+				modelsAreDifferents := true.
+	].
+
+	^ modelsAreDifferents.
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
+
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityAdded: anEntity actualValue: val ]
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
+
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityRemoved: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }

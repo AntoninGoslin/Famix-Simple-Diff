@@ -38,6 +38,15 @@ FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: exp
 ]
 
 { #category : 'instance creation' }
+FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
+	^ self 
+		entity: anEntity 
+		changeType: self entityRemoved 
+		expectedValue: expectedValue 
+		actualValue: nil
+]
+
+{ #category : 'instance creation' }
 FamixSimpleDifference class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
 	^ FamixSimpleDifferencePropertyChanged new
 		entity: anEntity; 
@@ -67,6 +76,31 @@ FamixSimpleDifference class >> entity: anEntity changeType: aSymbol expectedValu
 	^ difference
 ]
 
+{ #category : 'constants' }
+FamixSimpleDifference class >> entityAdded [
+	^ #entityAdded
+]
+
+{ #category : 'constants' }
+FamixSimpleDifference class >> entityChanged [
+	^ #entityChanged 
+]
+
+{ #category : 'constants' }
+FamixSimpleDifference class >> entityRemoved [
+	^ #entityRemoved
+]
+
+{ #category : 'constants' }
+FamixSimpleDifference class >> propertyChanged [ 
+	^ #propertyChanged 
+]
+
+{ #category : 'constants' }
+FamixSimpleDifference class >> relationChanged [ 
+	^ #relationChanged 
+]
+
 { #category : 'accessing' }
 FamixSimpleDifference >> actualValue [
 
@@ -77,6 +111,18 @@ FamixSimpleDifference >> actualValue [
 FamixSimpleDifference >> actualValue: anObject [
 
 	actualValue := anObject
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifference >> changeType [
+
+	^ changeType
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifference >> changeType: anObject [
+
+	changeType := anObject
 ]
 
 { #category : 'accessing' }
@@ -111,13 +157,11 @@ FamixSimpleDifference >> expectedValue: anObject [
 
 { #category : 'printing' }
 FamixSimpleDifference >> printOn: aStream [
-	"Redifine the display of the FamixDiff class"
-
 	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
-	aStream nextPutAll: self changeTypeName.
+	aStream print: changeType.
 	
 	aStream 
 		nextPutAll: ' -> Expected: '; 
