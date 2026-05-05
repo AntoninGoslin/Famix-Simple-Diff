@@ -1,19 +1,19 @@
 Class {
-	#name : 'FamixDiffTest',
+	#name : 'FamixSimpleDifferenceTest',
 	#superclass : 'TestCase',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'tests' }
-FamixDiffTest >> testInstanceCreation [
+FamixSimpleDifferenceTest >> testInstanceCreation [
 	| difference expectedValue actualValue |
 	
 	"testing a code modification"
 	expectedValue := 'private int money;'.
 	actualValue := 'private int age;'.
 	
-	difference := FamixDiff 
+	difference := FamixSimpleDifference 
 						entity: 'testEntity' 
 						changeType: #entityModification
 						expectedValue: expectedValue 
