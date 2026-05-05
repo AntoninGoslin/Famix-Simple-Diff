@@ -116,6 +116,7 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	If one stream is empty, we finish the remaining additions/ deletions.
 	Return true if models are equals, false otherwise.
 	"
+
 	| stream1 stream2 isEquals diff|
 	isEquals := true.
 	
@@ -161,8 +162,9 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	].
 
 	"cleaning end of pointers, checking if they have clean something"
-	(self clearRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
-	(self clearRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
+	"if they have deleted/added something, so the models are not equals"
+	(self finishRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
+	(self finishRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
 	
 	^ isEquals 
 ]
@@ -290,7 +292,7 @@ FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
 
 	^ self finishRemaining: aStream diffCreation: [ :val |
-		  FamixSimpleDifference createEntityRemoved: anEntity expectedValue: val ]
+		  FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }

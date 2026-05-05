@@ -38,15 +38,6 @@ FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: exp
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityRemoved: anEntity expectedValue: expectedValue [ 
-	^ self 
-		entity: anEntity 
-		changeType: self entityRemoved 
-		expectedValue: expectedValue 
-		actualValue: nil
-]
-
-{ #category : 'instance creation' }
 FamixSimpleDifference class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
 	^ FamixSimpleDifferencePropertyChanged new
 		entity: anEntity; 
@@ -64,43 +55,6 @@ FamixSimpleDifference class >> createRelationChanged: anEntity expectedValue: ex
 		yourself
 ]
 
-{ #category : 'instance creation' }
-FamixSimpleDifference class >> entity: anEntity changeType: aSymbol expectedValue: val1 actualValue: val2 [
-
-	| difference |
-	difference := FamixSimpleDifference new.
-	difference entity: anEntity.
-	difference changeType: aSymbol.
-	difference expectedValue: val1.
-	difference actualValue: val2.
-	^ difference
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityAdded [
-	^ #entityAdded
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityChanged [
-	^ #entityChanged 
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> entityRemoved [
-	^ #entityRemoved
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> propertyChanged [ 
-	^ #propertyChanged 
-]
-
-{ #category : 'constants' }
-FamixSimpleDifference class >> relationChanged [ 
-	^ #relationChanged 
-]
-
 { #category : 'accessing' }
 FamixSimpleDifference >> actualValue [
 
@@ -111,18 +65,6 @@ FamixSimpleDifference >> actualValue [
 FamixSimpleDifference >> actualValue: anObject [
 
 	actualValue := anObject
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> changeType [
-
-	^ changeType
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> changeType: anObject [
-
-	changeType := anObject
 ]
 
 { #category : 'accessing' }
@@ -161,7 +103,7 @@ FamixSimpleDifference >> printOn: aStream [
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
-	aStream print: changeType.
+	aStream print: self changeTypeName.
 	
 	aStream 
 		nextPutAll: ' -> Expected: '; 
