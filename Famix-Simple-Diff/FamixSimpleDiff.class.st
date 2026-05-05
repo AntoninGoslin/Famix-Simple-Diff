@@ -204,7 +204,7 @@ FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
 	"if the relations are not equals, we have a change, so we have to record it"
 	areEquals := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
 	areEquals ifFalse: [ 
-		diff := FamixDiff createRelationChanged: anEntity expectedValue: val1 actualValue: val2.
+		diff := FamixSimpleDifference createRelationChanged: anEntity expectedValue: val1 actualValue: val2.
 		self addDifference: diff.
 	].
 
