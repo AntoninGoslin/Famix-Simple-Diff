@@ -21,41 +21,47 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	| properties relations diff isEquals |
 	isEquals := true.
-	
+
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
-	aFamixEntity class = otherFamixEntity class ifFalse: [ 
-		diff := FamixSimpleDifference createEntityChanged: otherFamixEntity expectedValue: aFamixEntity class name actualValue: otherFamixEntity class name. 
-		self addDifference: diff.
-		^ self fail
-	].
+	aFamixEntity class = otherFamixEntity class ifFalse: [
+			diff := FamixSimpleDifference
+				        createEntityChanged: otherFamixEntity
+				        expectedValue: aFamixEntity class name
+				        actualValue: otherFamixEntity class name.
+			self addDifference: diff.
+			^ self fail ].
 
 	"Comparing properties (slots with non-famix values)"
 	properties := aFamixEntity class allSlots select: [ :slot |
 		              slot class = FMProperty ].
+
 	properties do: [ :p |
 			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
-				| prop1 prop2|
-				prop1 := p read: aFamixEntity.
-				prop2 := p read: otherFamixEntity.
-				
-				diff := FamixSimpleDifference createPropertyChanged: otherFamixEntity expectedValue: prop1 actualValue: prop2.
-				self addDifference: diff.
-				isEquals := false 
-			] 
-	].
+					| prop1 prop2 |
+					prop1 := p read: aFamixEntity.
+					prop2 := p read: otherFamixEntity.
+
+					diff := FamixSimpleDifference
+						        createPropertyChanged: otherFamixEntity
+						        expectedValue: prop1
+						        actualValue: prop2.
+					self addDifference: diff.
+					isEquals := false ] ].
 
 	"Comparing relations (slots with famix values)"
 	"We exclude source anchors because they are not relevant to model comparison"
-	relations := aFamixEntity class allSlots select: [ :slot | slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
+	relations := aFamixEntity class allSlots select: [ :slot |
+		             slot isFMRelationSlot and: [
+			             slot name ~= 'sourceAnchor' ] ].
+
 	relations do: [ :r |
-		"self haltIf: [ r name = #methods ]."
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
 				ifFalse: [ isEquals := false ] ].
 
 	"we stop the execution here if models are differents"
 	isEquals ifFalse: [ ^ self fail ].
-	
-	"Every slot value is equal, the entities are identical"
+
+	"Every slot value are equal, the entities are identical"
 	^ true
 ]
 
@@ -75,8 +81,8 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
-	| val1 val2 sortBlock|
-	
+
+	| val1 val2 sortBlock |
 	aFMRelationSlot isToOne
 		ifTrue: [
 				val1 := aFMRelationSlot read: aFamixEntity.
@@ -84,7 +90,7 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 		ifFalse: [
 				| rejectBlock |
 				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection.
-				val2 := (aFMRelationSlot read: otherFamixEntity)asOrderedCollection.
+				val2 := (aFMRelationSlot read: otherFamixEntity) asOrderedCollection.
 
 				sortBlock := val1
 					             ifEmpty: [ self sortBlock ]
@@ -103,8 +109,16 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	val1 == val2 ifTrue: [ ^ true ].
 
 	^ aFMRelationSlot isToOne
-		ifTrue: [ self compareToOneRelation: val1 actual: val2 target: otherFamixEntity ]
-		ifFalse: [ self compareToManyRelation: val1 actual: val2  target: otherFamixEntity ]
+		  ifTrue: [
+			  self
+				  compareToOneRelation: val1
+				  actual: val2
+				  target: otherFamixEntity ]
+		  ifFalse: [
+			  self
+				  compareToManyRelation: val1
+				  actual: val2
+				  target: otherFamixEntity ]
 ]
 
 { #category : 'comparing' }
@@ -117,70 +131,67 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	Return true if models are equals, false otherwise.
 	"
 
-	| stream1 stream2 isEquals diff|
+	| stream1 stream2 isEquals diff |
 	isEquals := true.
-	
+
 	stream1 := val1 readStream.
 	stream2 := val2 readStream.
-	
+
 	"looking the streams"
-	[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [ 
-		| elt1 elt2 name1 name2|
-		
-		"setup name"
-		elt1 := stream1 peek.
-		elt2 := stream2 peek.
-		
-		name1 := elt1 mooseName.
-		name2 := elt2 mooseName.
-		
-		name1 = name2 
-		"move forward both ptr if identicals"
-		ifTrue: [ 
-			stream1 next.
-			stream2 next.
-		]
-	
-		ifFalse: [ 
-			"deletion case"
-			name1 < name2 
-			ifTrue: [ 
-				diff := FamixSimpleDifference createEntityDeletion: anEntity expectedValue: elt1.
-				self addDifference: diff.
-				isEquals := false.
-				stream1 next. "ptr1++"
-			]
-		
-			"addition case"	
-			ifFalse: [
-				diff := FamixSimpleDifference createEntityAdded: anEntity actualValue: elt2.  
-				self addDifference: diff.
-				isEquals := false.
-				stream2 next."ptr2++"
-			]
-		].
-	].
+	[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [
+			| element1 element2 name1 name2 |
+			
+			"setup name"
+			element1 := stream1 peek.
+			element2 := stream2 peek.
+
+			name1 := element1 mooseName.
+			name2 := element2 mooseName.
+
+			name1 = name2
+				ifTrue: ["move forward both ptr if identicals"
+						stream1 next.
+						stream2 next ]
+				ifFalse: [
+						name1 < name2
+							ifTrue: ["deletion case"
+									diff := FamixSimpleDifference
+										        createEntityDeletion: anEntity
+										        expectedValue: element1.
+									self addDifference: diff.
+									isEquals := false.
+									stream1 next "ptr1++" ]
+								
+							ifFalse: ["addition case"
+									diff := FamixSimpleDifference
+										        createEntityAdded: anEntity
+										        actualValue: element2.
+									self addDifference: diff.
+									isEquals := false.
+									stream2 next "ptr2++" ] ] ].
 
 	"cleaning end of pointers, checking if they have clean something"
 	"if they have deleted/added something, so the models are not equals"
-	(self finishRemainingDeletionOf: stream1 target: anEntity ) ifTrue: [ isEquals := false ].
-	(self finishRemainingAdditionOf: stream2 target: anEntity ) ifTrue: [ isEquals := false ].
-	
-	^ isEquals 
+	(self finishRemainingDeletionOf: stream1 target: anEntity) ifTrue: [isEquals := false ].
+	(self finishRemainingAdditionOf: stream2 target: anEntity) ifTrue: [isEquals := false ].
+
+	^ isEquals
 ]
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
-	| areSame diff | 
 
+	| areEquals diff |
 	"if we dont have the same relations, so it changed, we have to record it"
-	areSame := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
-	areSame ifFalse: [ 
-		diff := FamixSimpleDifference createRelationChanged: anEntity expectedValue: val1 actualValue: val2.
-		self addDifference: diff.
-	].
+	areEquals := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+	areEquals ifFalse: [
+			diff := FamixSimpleDifference
+				        createRelationChanged: anEntity
+				        expectedValue: val1
+				        actualValue: val2.
+			self addDifference: diff ].
 
-	^ areSame "if they are not the same, so they are not equals"
+	^ areEquals
 ]
 
 { #category : 'path-computing' }
@@ -206,7 +217,6 @@ FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 	| path |
 	path := self pathOfEntity: entity.
 	^ self entityAtPath: path inModel: model
-	
 ]
 
 { #category : 'debug' }
@@ -217,6 +227,7 @@ FamixSimpleDiff >> debugOn [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> differences [
+
 	^ differences
 ]
 
@@ -234,7 +245,6 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
 	| rootEntity |
-	
 	rootEntity := (self entityRoots: model) at: indexPath first.
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
 ]
@@ -268,17 +278,16 @@ FamixSimpleDiff >> fail [
 
 { #category : 'accessing' }
 FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
-	|  modelsAreDifferents diff |
-	modelsAreDifferents := false.
-	
-	[ aStream atEnd ] 
-	whileFalse: [
-				diff := aDifferenceCreation value: aStream next.
-				self addDifference: diff.
-				modelsAreDifferents := true.
-	].
 
-	^ modelsAreDifferents.
+	| modelsAreDifferents diff |
+	modelsAreDifferents := false.
+
+	[ aStream atEnd ] whileFalse: [
+			diff := aDifferenceCreation value: aStream next.
+			self addDifference: diff.
+			modelsAreDifferents := true ].
+
+	^ modelsAreDifferents
 ]
 
 { #category : 'accessing' }
@@ -292,16 +301,16 @@ FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
 
 	^ self finishRemaining: aStream diffCreation: [ :val |
-		  FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
+			FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }
 FamixSimpleDiff >> initialize [
-	
+
 	super initialize.
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
-	differences := OrderedCollection new.
+	differences := OrderedCollection new
 ]
 
 { #category : 'path-computing' }
@@ -390,7 +399,7 @@ FamixSimpleDiff >> sortedChildren: entity [
 												       ifNotNil: [ "case for two entities with identical printing string but different source anchor (several inner classes in the same parent for example)"
 													       a sourceAnchor endPos < b sourceAnchor endPos ]
 												       ifNil: [ valA < valB ] ]
-									       ifNil: [ valA < valB] ]
+									       ifNil: [ valA < valB ] ]
 						       ifFalse: [ valA < valB ] ] ].
 
 
