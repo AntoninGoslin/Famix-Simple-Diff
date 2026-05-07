@@ -27,5 +27,5 @@ BaselineOfFamixSimpleDiff >> mooseTestResourcesJavaModels: spec [
 	spec
 		baseline: 'MooseTestResourcesJavaModels'
 		with: [ 
-		spec repository: 'github://RomainDeg/Moose-TestResources-JavaModels:main/src' ]
+		spec repository: 'github://RomainDeg/Moose-TestResources-JavaModels:main/src?useHttps' ]
 ]
