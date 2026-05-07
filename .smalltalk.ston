@@ -4,10 +4,6 @@ SmalltalkCISpec {
       #baseline : 'FamixSimpleDiff',
       #directory : '',
       #onConflict : #useIncoming,
-      #platforms : [ #pharo , #moose ]
     }
-  ],
-  #testing : {
-    #packages : [ 'Famix-Simple-Diff' ]
-  }
+  ]
 }
