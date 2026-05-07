@@ -7,5 +7,24 @@ Class {
 
 { #category : 'accessing' }
 FamixJavaModelResource class >> resources [
-	^{ FamixJavaModelResource } 
+
+	^ { FamixJavaModelResource }
+]
+
+{ #category : 'accessing' }
+FamixJavaModelResource >> libraryModel [
+
+	^ self resources anyOne current libraryModel
+]
+
+{ #category : 'accessing' }
+FamixJavaModelResource >> mainModel1 [ 
+
+	^ self resources anyOne current mainModel1
+]
+
+{ #category : 'accessing' }
+FamixJavaModelResource >> mainModel2 [ 
+
+	^ self resources anyOne current mainModel2
 ]
