@@ -4,7 +4,7 @@ SmalltalkCISpec {
       #baseline : 'FamixSimpleDiff',
       #directory : '',
       #onConflict : #useIncoming,
-      #platforms : [ #pharo ]
+      #platforms : [ #pharo , #moose ]
     }
   ],
   #testing : {
