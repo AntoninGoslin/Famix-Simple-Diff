@@ -2,10 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - main
+      - creating_CI
+      - differences-list
+      - differences-list-with-meta-model
 
   pull_request:
-    branches: [ main ]
+    branches: 
+      - main
+      - creating_CI
+      - differences-list
+      - differences-list-with-meta-model
 
 jobs:
   test:
