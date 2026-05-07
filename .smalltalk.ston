@@ -1,0 +1,13 @@
+SmalltalkCISpec {
+  #loading : [
+    SCIMetacelloLoadSpec {
+      #baseline : 'FamixSimpleDiff',
+      #directory : '',
+      #onConflict : #useIncoming,
+      #platforms : [ #pharo ]
+    }
+  ],
+  #testing : {
+    #packages : [ 'Famix-Simple-Diff' ]
+  }
+}
