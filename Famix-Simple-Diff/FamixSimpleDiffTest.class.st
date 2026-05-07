@@ -137,6 +137,28 @@ FamixSimpleDiffTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCl
 ]
 
 { #category : 'tests' }
+FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentClasses [
+    | sd class1 class2 diff |
+    sd := FamixSimpleDiff new.
+    
+    "different classes"
+    class1 := FamixJavaClass new name: 'MyClass'.
+    class2 := FamixJavaClass new name: 'MyOtherClass'.
+    
+    "checking the list of diff"
+    self deny: (sd compareEntity: class1 to: class2).
+    self deny: sd differences isEmpty.
+    self assert: sd differences size equals: 1.
+    
+    diff := sd differences first.
+    
+    self assert: diff class equals: FamixSimpleDifferencePropertyChanged. 
+    self assert: diff expectedValue equals: 'MyClass'.
+    self assert: diff actualValue equals: 'MyOtherClass'.
+    
+]
+
+{ #category : 'tests' }
 FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentType [
 	| sd class method diff |
 	sd := FamixSimpleDiff new.
