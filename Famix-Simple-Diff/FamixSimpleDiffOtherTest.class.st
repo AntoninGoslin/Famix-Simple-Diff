@@ -27,7 +27,7 @@ FamixSimpleDiffOtherTest >> testDifferenceDetectedWhenToOneRelationChanged [
 "TODO: This test have to be fixed"
 
 """
-    | sd class1 class2 model1 model2 diff method1 method2 |
+    | sd class1 class2 model1 model2 diff method1 method2 | 
     sd := FamixSimpleDiff new.
 
     model1 := FamixJavaModel new.
