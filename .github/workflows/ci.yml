@@ -9,4 +9,4 @@ jobs:
     uses: moosetechnology/.github/.github/workflows/run-tests.yml@main
     secrets: inherit
     with:
-      create-artifacts: true
+      create-artifact: true
