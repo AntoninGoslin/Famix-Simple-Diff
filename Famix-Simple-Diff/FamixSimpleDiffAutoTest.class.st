@@ -1,3 +1,8 @@
+"
+This test class contains all the test cases where we use auto-generated models. 
+
+This approach allows us to easily test simple cases in which we only need simple models that can be easily generated and where we can use the same model for each test.
+"
 Class {
 	#name : 'FamixSimpleDiffAutoTest',
 	#superclass : 'TestCase',
