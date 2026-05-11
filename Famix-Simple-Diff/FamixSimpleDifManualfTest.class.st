@@ -1,11 +1,6 @@
 Class {
 	#name : 'FamixSimpleDifManualfTest',
 	#superclass : 'TestCase',
-	#instVars : [
-		'mainModel1',
-		'mainModel2',
-		'libraryModel'
-	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
@@ -16,10 +11,7 @@ FamixSimpleDifManualfTest >> setUp [
 
 	"fix here to limit window's performances problems"
 	self timeLimit: 30 seconds.
-	"Put here a common initialization logic for tests"
-	mainModel1 := TestJavaModelBuilder loadMainModel.
-	mainModel2 := TestJavaModelBuilder loadMainModel.
-	libraryModel := TestJavaModelBuilder loadLibraryModel 
+	"Put here a common initialization logic for tests" 
 ]
 
 { #category : 'tests' }
