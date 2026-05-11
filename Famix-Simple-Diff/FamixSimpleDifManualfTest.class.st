@@ -15,7 +15,7 @@ FamixSimpleDifManualfTest >> setUp [
 	super setUp.
 
 	"fix here to limit window's performances problems"
-	self timeLimit: 15 seconds.
+	self timeLimit: 30 seconds.
 	"Put here a common initialization logic for tests"
 	mainModel1 := TestJavaModelBuilder loadMainModel.
 	mainModel2 := TestJavaModelBuilder loadMainModel.
@@ -126,7 +126,7 @@ FamixSimpleDifManualfTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDi
     
     self assert: diff class equals: FamixSimpleDifferencePropertyChanged. 
     self assert: diff expectedValue equals: 'MyClass'.
-    self assert: diff actualValue equals: 'MyOtherClass'.
+    self assert: diff actualValue equals: 'MyOtherClass'. 
     
 ]
 
