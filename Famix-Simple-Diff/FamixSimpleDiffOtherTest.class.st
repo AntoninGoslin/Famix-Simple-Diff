@@ -1,3 +1,6 @@
+"
+This test class contains all the test cases that do not require building models.
+"
 Class {
 	#name : 'FamixSimpleDiffOtherTest',
 	#superclass : 'TestCase',
