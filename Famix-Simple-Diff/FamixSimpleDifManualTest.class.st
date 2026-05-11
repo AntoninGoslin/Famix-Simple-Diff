@@ -1,3 +1,7 @@
+"
+This test class contains all the test cases where we manually build models and entities. 
+This approach allows us to isolate and test specific cases that are too complicated to test in a large, automatically generated model.
+"
 Class {
 	#name : 'FamixSimpleDifManualTest',
 	#superclass : 'TestCase',
