@@ -1,3 +1,12 @@
+"
+This is a class that represents and creates a single difference between two Famix entities or models. 
+
+The subclasses represent specific types of modifications (such as addition, deletion, property change, etc.). 
+
+This class uses a target entity, which is an entity from the second model that we are comparing, on which the change occurred.
+
+Thanks to the target, we always have an expected value (from the original model) and an actual value (from the new model).
+"
 Class {
 	#name : 'FamixSimpleDifference',
 	#superclass : 'Object',
