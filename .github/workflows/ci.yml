@@ -1,0 +1,34 @@
+name: Famix-Simpl-Diff-CI
+
+on:
+  push:
+    branches:
+      - main
+      - differences-list
+      - differences-list-with-meta-model
+      - spliting_auto_and_manual_models_for_tests
+
+  pull_request:
+    branches:
+      - main
+      - differences-list
+      - differences-list-with-meta-model
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        smalltalk: [ Moose64-13 ]
+    name: ${{ matrix.smalltalk }}
+
+    steps:
+      - uses: actions/checkout@v4
+       
+      - uses: hpi-swa/setup-smalltalkCI@v1
+        with:
+          smalltalk-image: ${{ matrix.smalltalk }}
+         
+      - run: smalltalkci -s ${{ matrix.smalltalk }}
+        shell: bash
+        timeout-minutes: 10

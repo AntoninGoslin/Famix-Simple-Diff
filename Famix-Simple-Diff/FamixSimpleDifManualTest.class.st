@@ -1,57 +1,25 @@
+"
+This test class contains all the test cases where we manually build models and entities. 
+This approach allows us to isolate and test specific cases that are too complicated to test in a large, automatically generated model.
+"
 Class {
-	#name : 'FamixSimpleDiffTest',
+	#name : 'FamixSimpleDifManualTest',
 	#superclass : 'TestCase',
-	#instVars : [
-		'mainModel1',
-		'mainModel2',
-		'libraryModel'
-	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'running' }
-FamixSimpleDiffTest >> setUp [
+FamixSimpleDifManualTest >> setUp [
 	super setUp.
 
 	"fix here to limit window's performances problems"
-	self timeLimit: 15 seconds.
-	"Put here a common initialization logic for tests"
-	mainModel1 := TestJavaModelBuilder loadMainModel.
-	mainModel2 := TestJavaModelBuilder loadMainModel.
-	libraryModel := TestJavaModelBuilder loadLibraryModel 
+	self timeLimit: 30 seconds.
+	"Put here a common initialization logic for tests" 
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testClassesWithDifferentNamesAreNotEqual [
-
-	| sd entity1 entity2 |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass'.
-	entity2 name: 'NewName'. 
-	
-	self assert: (sd compareEntity: entity1 to: entity2) equals: false
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testClassesWithDifferentSuperclassesAreNotEqual [
-
-	| sd entity1 entity2 newInheritance |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass'.
-	
-	newInheritance := mainModel2 newInheritance
-		superclass: entity2;
-		subclass: entity2.
-	entity2 superInheritances: { newInheritance }. 
-	
-	self assert: (sd compareEntity: entity1 to: entity2) equals: false
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeCleaned [
+FamixSimpleDifManualTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeCleaned [
 	| sd class1 class2 model1 model2 diff methodA1 methodA2 methodB methodC |
 	sd := FamixSimpleDiff new.
 
@@ -84,17 +52,17 @@ FamixSimpleDiffTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeClean
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: FamixDiff entityAdded.
-	self assert: diff first expectedValue equals: nil.
+	self assert: diff first class equals: FamixSimpleDifferenceEntityAddition.
+	self assert: diff first expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff first actualValue name equals: 'methodB'.
 	
-	self assert: diff second changeType equals: FamixDiff entityAdded.
-	self assert: diff second expectedValue equals: nil.
+	self assert: diff second class equals: FamixSimpleDifferenceEntityAddition.
+	self assert: diff first expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff second actualValue name equals: 'methodC'.
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCleaned [
+FamixSimpleDifManualTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCleaned [
 	| sd class1 class2 model1 model2 diff methodA1 methodA2 methodB methodC |
 	sd := FamixSimpleDiff new.
 
@@ -127,39 +95,39 @@ FamixSimpleDiffTest >> testClearRemainingSuppressionWhenMultipleMethodHaveToBeCl
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: FamixDiff entityRemoved.
+	self assert: diff first class equals: FamixSimpleDifferenceEntityDeletion.
 	self assert: diff first expectedValue name equals: 'methodB'.
-	self assert: diff first actualValue equals: nil.
+	self assert: diff first actualValue class equals: FamixSimpleDifferenceNullValue.
 	
-	self assert: diff second changeType equals: FamixDiff entityRemoved.
+	self assert: diff second class equals: FamixSimpleDifferenceEntityDeletion.
 	self assert: diff second expectedValue name equals: 'methodC'.
-	self assert: diff second actualValue equals: nil.
+	self assert: diff second actualValue class equals: FamixSimpleDifferenceNullValue.
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentClasses [
-	| sd class1 class2 diff |
-	sd := FamixSimpleDiff new.
-	
-	"different classes"
-	class1 := FamixJavaClass new name: 'MyClass'.
-	class2 := FamixJavaClass new name: 'MyOtherClass'.
-	
-	"checking the list of diff"
-	self deny: (sd compareEntity: class1 to: class2).
-	self deny: sd differences isEmpty.
-	self assert: sd differences size equals: 1.
-	
-	diff := sd differences first.
-	
-	self assert: diff changeType equals: FamixDiff propertyChanged. 
-	self assert: diff expectedValue equals: 'MyClass'.
-	self assert: diff actualValue equals: 'MyOtherClass'.
-	
+FamixSimpleDifManualTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentClasses [
+    | sd class1 class2 diff |
+    sd := FamixSimpleDiff new.
+    
+    "different classes"
+    class1 := FamixJavaClass new name: 'MyClass'.
+    class2 := FamixJavaClass new name: 'MyOtherClass'.
+    
+    "checking the list of diff"
+    self deny: (sd compareEntity: class1 to: class2).
+    self deny: sd differences isEmpty.
+    self assert: sd differences size equals: 1.
+    
+    diff := sd differences first.
+    
+    self assert: diff class equals: FamixSimpleDifferencePropertyChanged. 
+    self assert: diff expectedValue equals: 'MyClass'.
+    self assert: diff actualValue equals: 'MyOtherClass'. 
+    
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentType [
+FamixSimpleDifManualTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferentType [
 	| sd class method diff |
 	sd := FamixSimpleDiff new.
 	
@@ -174,14 +142,14 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseAndRecordsDiffWhenDifferen
 	
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: FamixDiff entityChanged.
+	self assert: diff class equals: FamixSimpleDifferenceEntityChanged.
 	self assert: diff expectedValue equals: 'FamixJavaClass'.
 	self assert: diff actualValue equals: 'FamixJavaMethod'.
 	
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenAMethodIsAddedBeforeExisting [
+FamixSimpleDifManualTest >> testCompareEntityToReturnsFalseWhenAMethodIsAddedBeforeExisting [
 	| sd class1 class2 methodA methodB1 methodB2 model1 model2 diff |
 	sd := FamixSimpleDiff new.
 
@@ -209,13 +177,13 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenAMethodIsAddedBeforeEx
 		
 	diff := sd differences.
 	
-	self assert: diff first changeType equals: FamixDiff entityAdded.
-	self assert: diff first expectedValue equals: nil.
+	self assert: diff first class equals: FamixSimpleDifferenceEntityAddition.
+	self assert: diff first expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff first actualValue equals: methodA.
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsAdded [
+FamixSimpleDifManualTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsAdded [
 	| sd class1 class2 method1 method2 method3 model1 model2 diff |
 	sd := FamixSimpleDiff new.
 
@@ -246,13 +214,13 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 		
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: FamixDiff entityAdded.
-	self assert: diff expectedValue equals: nil.
+	self assert: diff class equals: FamixSimpleDifferenceEntityAddition.
+	self assert: diff expectedValue class equals: FamixSimpleDifferenceNullValue.
 	self assert: diff actualValue name equals: 'newMethod'.
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsDeleted [
+FamixSimpleDifManualTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodIsDeleted [
 	| sd class1 class2 method1 method2 method3 model1 model2 diff |
 	sd := FamixSimpleDiff new.
 
@@ -282,13 +250,13 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsFalseWhenSameClassesAndAMethodI
 		
 	diff := sd differences first.
 	
-	self assert: diff changeType equals: FamixDiff entityRemoved.
+	self assert: diff class equals: FamixSimpleDifferenceEntityDeletion.
 	self assert: diff expectedValue name equals: 'deletedMethod'.
-	self assert: diff actualValue equals: nil.
+	self assert: diff actualValue class equals: FamixSimpleDifferenceNullValue.
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameClasses [
+FamixSimpleDifManualTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameClasses [
 	| sd class1 class2 |
 	sd := FamixSimpleDiff new.
 	
@@ -301,7 +269,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsTrueAndEmptyDiffListWhenSameCla
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMethods [
+FamixSimpleDifManualTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMethods [
 	| sd class1 class2 method1 method2 model1 model2 |
 	sd := FamixSimpleDiff new.
 	
@@ -328,233 +296,7 @@ FamixSimpleDiffTest >> testCompareEntityToReturnsTrueWhenSameClassesAndSameMetho
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testCorrespondingClassesAreEqual [
-
-	| sd entity1 entity2 path |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	path := sd pathOfEntity: entity1.
-	entity2 := sd entityAtPath: path inModel: mainModel2.
-	
-	self assert: (sd compareEntity: entity1 to: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testCorrespondingClassesInSameModelIsSameEntity [
-
-	| sd entity1 entity2 path |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	path := sd pathOfEntity: entity1.
-	entity2 := sd entityAtPath: path inModel: mainModel1.
-	
-	self assert: entity1 == entity2
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testCorrespondingMethodsAreEqual [
-
-	| sd entity1 entity2 path |
-	sd := FamixSimpleDiff new.
-	
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	path := sd pathOfEntity: entity1.
-	entity2 := sd entityAtPath: path inModel: mainModel2.
-	
-	self assert: (sd compareEntity: entity1 to: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testCorrespondingMethodsInSameModelIsSameEntity [
-
-	| sd entity1 entity2 path |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	path := sd pathOfEntity: entity1.
-	entity2 := sd entityAtPath: path inModel: mainModel1.
-	
-	self assert: entity1 == entity2
-]
-
-{ #category : 'as yet unclassified' }
-FamixSimpleDiffTest >> testCorrespondingPrimitiveTypesAreEqual [
-
-	| sd entity1 entity2 path |
-	sd := FamixSimpleDiff new.
-
-	entity1 := (mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()') declaredType.
-	path := sd pathOfEntity: entity1.
-	entity2 := sd entityAtPath: path inModel: mainModel2.
-	
-	self assert: (sd compareEntity: entity1 to: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testDifferenceDetectedWhenToOneRelationChanged [
-
-    | sd class1 class2 model1 model2 diff method1 method2 |
-    sd := FamixSimpleDiff new.
-
-    model1 := FamixJavaModel new.
-    model2 := FamixJavaModel new.
-
-    class1 := FamixJavaClass new name: 'ClassA'.
-    class2 := FamixJavaClass new name: 'ClassB'.
-
-    method1 := FamixJavaMethod new name: 'myMethod'.
-    method1 signature: 'myMethod()'.
-    method2 := FamixJavaMethod new name: 'myMethod'.
-    method2 signature: 'myMethod()'.
-
-    "modify to one relation"
-    method1 parentType: class1.
-    method2 parentType: class2.
-
-    model1 add: class1.
-    model2 add: class2.
-
-    self deny: (sd compareEntity: method1 to: method2).
-    self assert: sd differences size equals: 1.
-
-    diff := sd differences.
-
-    self assert: diff first changeType equals:  FamixDiff relationChanged.
-    self assert: diff first expectedValue equals: class1.
-    self assert: diff first actualValue equals: class2
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testEntityWithDifferentRelationsSizesAreNotEquals [
-
-	| sd entity1 entity2 newMethod methodList |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass'.
-	
-	"adding a new method to set a difference between the two models"
-	newMethod := FamixJavaMethod new name: 'newMethod()'.
-	
-	"adding the method in the current method list"
-	methodList := entity2 methods asOrderedCollection.
-	methodList add: newMethod.
-	
-	"changing the method list"
-	entity2 methods: methodList.
-	
-	self deny: (sd compareEntity: entity1 to: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testEqualClassesAreEqual [
-
-	| sd entity1 |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	
-	self assert: (sd compareEntity: entity1 to: entity1)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testEqualMethodsAreEqual [
-
-	| sd entity1 |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	
-	self assert: (sd compareEntity: entity1 to: entity1)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testEqualModelsAreEqual [
-
-	| sd |
-	sd := FamixSimpleDiff new.
-	
-	self assert: (sd compareModel: mainModel1 to: mainModel2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testMethodsWithDifferentNamesAreNotEqual [
-
-	| sd entity1 entity2 |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	entity2 name: 'NewName'. 
-	
-	self assert: (sd compareEntity: entity1 to: entity2) equals: false
-]
-
-{ #category : 'as yet unclassified' }
-FamixSimpleDiffTest >> testNotEqualModelsAreNotEqual [
-
-	| sd |
-	sd := FamixSimpleDiff new.
-	self deny: (sd compareModel: mainModel1 to: libraryModel)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testRecursiveCompareEntityReturnFalseOnDeepDifferentModels [
-
-	| sd childMethod2 |
-	sd := FamixSimpleDiff new.
-	
-	"modify a child"
-	childMethod2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	childMethod2 name: 'getIntAttributeWithDifferentName'.
-	
-	"the models should not be equals"
-	self deny: (sd compareModel: mainModel1 to: mainModel2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testSameClassesAreEqual [
-
-	| sd entity1 entity2 |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass'.
-	
-	self assert: (sd compareEntity: entity1 to: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testSameMethodsAreEqual [
-
-	| sd entity1 entity2 |
-	sd := FamixSimpleDiff new.
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	entity2 := mainModel2 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	
-	self assert: (sd compareEntity: entity1 to: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testSameModelsAreEqual [
-
-	| sd |
-	sd := FamixSimpleDiff new.
-	
-	self assert: (sd compareModel: mainModel1 to: mainModel1)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testSortBlockOrdersByName [
-
-	| sd block entity1 entity2 |
-	sd := FamixSimpleDiff new.
-	
-	block := sd sortBlock.
-	
-	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
-	entity2 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.
-	
-	self assert: (block value: entity2 value: entity1).
-	self deny: (block value: entity1 value: entity2)
-]
-
-{ #category : 'tests' }
-FamixSimpleDiffTest >> testSortedChildrenFiltersStubsAndInitializers [
+FamixSimpleDifManualTest >> testSortedChildrenFiltersStubsAndInitializers [
 	| sd parent normalMethod stubMethod initializeMethod res |
 	sd := FamixSimpleDiff new.
 	
@@ -577,7 +319,7 @@ FamixSimpleDiffTest >> testSortedChildrenFiltersStubsAndInitializers [
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName [
+FamixSimpleDifManualTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName [
 	| sd parent aBeginMethod bBeginMethod res |
 	sd := FamixSimpleDiff new.
 	
@@ -594,7 +336,7 @@ FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName [
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameNameNotSameAnchors [
+FamixSimpleDifManualTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameNameNotSameAnchors [
 	| sd parent aBeginMethod bBeginMethod anchor1 anchor2 res |
 	sd := FamixSimpleDiff new.
 	
@@ -622,7 +364,7 @@ FamixSimpleDiffTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameNameNotSa
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenFirstAnchorIsMissing [
+FamixSimpleDifManualTest >> testSortedChildrenUseSourceAnchorWhenFirstAnchorIsMissing [
 	| sd parent method1 method2 anchor2 res |
 	sd := FamixSimpleDiff new.
 	
@@ -647,7 +389,7 @@ FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenFirstAnchorIsMissing
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenSameName [
+FamixSimpleDifManualTest >> testSortedChildrenUseSourceAnchorWhenSameName [
 	| sd parent method1 method2 anchor1 anchor2 res |
 	sd := FamixSimpleDiff new.
 	
@@ -675,7 +417,7 @@ FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenSameName [
 ]
 
 { #category : 'tests' }
-FamixSimpleDiffTest >> testSortedChildrenUseSourceAnchorWhenSecondAnchorIsMissing [
+FamixSimpleDifManualTest >> testSortedChildrenUseSourceAnchorWhenSecondAnchorIsMissing [
 	| sd parent method1 method2 anchor1 res |
 	sd := FamixSimpleDiff new.
 	
