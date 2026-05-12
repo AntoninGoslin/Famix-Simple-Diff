@@ -19,18 +19,6 @@ BaselineOfFamixSimpleDiff >> baseline: spec [
 			package: 'Famix-Simple-Diff' with: [
 				spec requires:
 						#( 'MooseTestResourcesJavaModels' ) ] ].
-				
-	spec for: #NeedsFamix do: [
-            spec baseline: 'Famix' with: [ spec repository: 'github://moosetechnology/Famix:development/src' ].
-            spec
-                package: 'Famix-Simple-Diff' with: [ spec requires: #( Famix ) ]].
-]
-
-{ #category : 'baselines' }
-BaselineOfFamixSimpleDiff >> customProjectAttributes [
-
-    'BaselineOfFamix' asPackageIfAbsent: [ ^ #( #NeedsFamix ) ].
-    ^ #(  )
 ]
 
 { #category : 'baselines' }
