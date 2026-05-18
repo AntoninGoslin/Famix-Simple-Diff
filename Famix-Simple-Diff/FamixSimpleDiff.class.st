@@ -1,3 +1,10 @@
+"
+This is a class that performs the comparison between two Famix models to detect differences (addition, deletion, changes).
+
+We traverse all the entities of the model and use the Moose meta-description to compare their types, properties, and relations.
+
+This class will create a list that gathers all the differences between the models.
+"
 Class {
 	#name : 'FamixSimpleDiff',
 	#superclass : 'Object',

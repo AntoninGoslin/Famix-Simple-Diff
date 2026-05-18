@@ -1,3 +1,9 @@
+"
+This class represents a specific type of difference where two entities changed.
+
+The expected value is the entity from the original model.
+The actual value is the entity from the modified model.
+"
 Class {
 	#name : 'FamixSimpleDifferenceEntityChanged',
 	#superclass : 'FamixSimpleDifference',
