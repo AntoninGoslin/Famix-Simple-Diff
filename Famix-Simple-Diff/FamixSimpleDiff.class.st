@@ -38,28 +38,31 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 			self addDifference: diff.
 			^ self fail ].
 
-	"Comparing properties (slots with non-famix values)"
-	properties := aFamixEntity class allSlots select: [ :slot |
-		              slot class = FMProperty ].
+	"Comparing properties using Moose meta models" 
+	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties and the numberOfLinesOfCode to not pollute difference list" 
+	properties := aFamixEntity mooseDescription allProperties select: [ :property |
+			              property type isPrimitive and: [
+				              property isDerived not and: [
+					              property name ~= 'numberOfLinesOfCode' ] ] ].
 
+	"we read property values, and create a difference if they are not equals"
 	properties do: [ :p |
-			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
-					| prop1 prop2 |
-					prop1 := p read: aFamixEntity.
-					prop2 := p read: otherFamixEntity.
+		| property1 property2 |
+		property1 := p getRawFrom: aFamixEntity.
+		property2 := p getRawFrom: otherFamixEntity.
+		property1 = property2 ifFalse: [
+				diff := FamixSimpleDifference
+					        createPropertyChanged: otherFamixEntity
+					        expectedValue: property1
+					        actualValue: property2.
+				self addDifference: diff.
+				isEquals := false ] ].
 
-					diff := FamixSimpleDifference
-						        createPropertyChanged: otherFamixEntity
-						        expectedValue: prop1
-						        actualValue: prop2.
-					self addDifference: diff.
-					isEquals := false ] ].
-
-	"Comparing relations (slots with famix values)"
-	"We exclude source anchors because they are not relevant to model comparison"
-	relations := aFamixEntity class allSlots select: [ :slot |
-		             slot isFMRelationSlot and: [
-			             slot name ~= 'sourceAnchor' ] ].
+	"Comparing relations using Moose meta models"
+	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
+	relations := aFamixEntity mooseDescription allProperties select: [ :property |
+			             property type isPrimitive not and: [
+				          	property name ~= 'sourceAnchor' ] ].
 
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
@@ -87,17 +90,17 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
+FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: otherFamixEntity [
 
 	| val1 val2 sortBlock |
-	aFMRelationSlot isToOne
-		ifTrue: [
-				val1 := aFMRelationSlot read: aFamixEntity.
-				val2 := aFMRelationSlot read: otherFamixEntity ]
-		ifFalse: [
+	aRelationDescription isMultivalued
+		ifFalse: ["toOne relation"
+				val1 := aRelationDescription getRawFrom: aFamixEntity.
+				val2 := aRelationDescription getRawFrom: otherFamixEntity ]
+		ifTrue: ["toMany relation"
 				| rejectBlock |
-				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection.
-				val2 := (aFMRelationSlot read: otherFamixEntity) asOrderedCollection.
+				val1 := (aRelationDescription getRawFrom: aFamixEntity) asOrderedCollection.
+				val2 := (aRelationDescription getRawFrom: otherFamixEntity) asOrderedCollection.
 
 				sortBlock := val1
 					             ifEmpty: [ self sortBlock ]
@@ -115,13 +118,13 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	This guards for that..."
 	val1 == val2 ifTrue: [ ^ true ].
 
-	^ aFMRelationSlot isToOne
-		  ifTrue: [
+	^ aRelationDescription isMultivalued
+		  ifFalse: [
 			  self
 				  compareToOneRelation: val1
 				  actual: val2
 				  target: otherFamixEntity ]
-		  ifFalse: [
+		  ifTrue: [
 			  self
 				  compareToManyRelation: val1
 				  actual: val2
