@@ -12,7 +12,10 @@ Class {
 		'roots',
 		'childrenCache',
 		'debug',
-		'differences'
+		'differences',
+		'relationCounter',
+		'propertiesCounter',
+		'inspectedClasses'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
@@ -26,7 +29,7 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
-	| properties relations diff isEquals |
+	| properties relations diff isEquals allProperties |
 	isEquals := true.
 
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
@@ -38,9 +41,11 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 			self addDifference: diff.
 			^ self fail ].
 
+	allProperties := aFamixEntity mooseDescription allProperties.
+
 	"Comparing properties using Moose meta models" 
 	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties and the numberOfLinesOfCode to not pollute difference list" 
-	properties := aFamixEntity mooseDescription allProperties select: [ :property |
+	properties := allProperties select: [ :property |
 			              property type isPrimitive and: [
 				              property isDerived not and: [
 					              property name ~= 'numberOfLinesOfCode' ] ] ].
@@ -48,6 +53,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	"we read property values, and create a difference if they are not equals"
 	properties do: [ :p |
 		| property1 property2 |
+		propertiesCounter := propertiesCounter + 1.
 		property1 := p getRawFrom: aFamixEntity.
 		property2 := p getRawFrom: otherFamixEntity.
 		property1 = property2 ifFalse: [
@@ -60,10 +66,21 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	"Comparing relations using Moose meta models"
 	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
-	relations := aFamixEntity mooseDescription allProperties select: [ :property |
-			             property type isPrimitive not and: [
-				          	property name ~= 'sourceAnchor' ] ].
+	relations := allProperties select: [ :property |
+			             property type isPrimitive not and: [ property isDerived not and: [
+				          	property name ~= 'sourceAnchor' ] ] ].
 
+	"debug, si clé pas dans dico on ajoute"
+	"key -> classe"
+	"value -> property et relation"
+	inspectedClasses at: aFamixEntity class name ifAbsentPut: 
+	[ 
+		Dictionary new
+		at: 'properties' put: (properties);
+		at: 'relations' put: (relations);
+		yourself 
+	].
+		
 	relations do: [ :r |
 			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
 				ifFalse: [ isEquals := false ] ].
@@ -77,6 +94,9 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
+
+	relationCounter := 0.
+	propertiesCounter := 0.
 
 	(self entityRoots: aFamixJavaModel) do: [ :root |
 			| correspondingRoot |
@@ -93,6 +113,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: otherFamixEntity [
 
 	| val1 val2 sortBlock |
+	relationCounter := relationCounter + 1.
 	aRelationDescription isMultivalued
 		ifFalse: ["toOne relation"
 				val1 := aRelationDescription getRawFrom: aFamixEntity.
@@ -320,7 +341,10 @@ FamixSimpleDiff >> initialize [
 	super initialize.
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
-	differences := OrderedCollection new
+	differences := OrderedCollection new.
+	relationCounter := 0.
+	propertiesCounter := 0.
+	inspectedClasses := Dictionary new.
 ]
 
 { #category : 'path-computing' }
