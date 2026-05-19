@@ -67,8 +67,8 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	"Comparing relations using Moose meta models"
 	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
 	relations := allProperties select: [ :property |
-			             property type isPrimitive not and: [ property isDerived not and: [
-				          	property name ~= 'sourceAnchor' ] ] ].
+			             property type isPrimitive not and: [
+				          	property name ~= 'sourceAnchor' ] ].
 
 	"debug, si clé pas dans dico on ajoute"
 	"key -> classe"
