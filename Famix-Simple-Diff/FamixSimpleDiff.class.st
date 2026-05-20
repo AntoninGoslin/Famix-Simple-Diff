@@ -433,19 +433,6 @@ FamixSimpleDiff >> sortBlock [
 ]
 
 { #category : 'sorting' }
-FamixSimpleDiff >> sortBlockFor: anEntity [
-
-	^ anEntity hasUniqueMooseNameInModel
-		  ifTrue: [ [ :a :b | a mooseName < b mooseName ] ]
-		  ifFalse: [
-				  [ :a :b |
-					  | valA valB |
-					  valA := String streamContents: [ :s | a printOn: s ].
-					  valB := String streamContents: [ :s | b printOn: s ].
-					  valA < valB ] ]
-]
-
-{ #category : 'sorting' }
 FamixSimpleDiff >> sortedChildren: entity [
 
 	^ childrenCache at: entity ifAbsentPut: [
