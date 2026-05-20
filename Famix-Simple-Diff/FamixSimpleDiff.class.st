@@ -123,15 +123,11 @@ FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: 
 				val1 := (aRelationDescription getRawFrom: aFamixEntity) asOrderedCollection.
 				val2 := (aRelationDescription getRawFrom: otherFamixEntity) asOrderedCollection.
 
-				sortBlock := val1
-					             ifEmpty: [ self sortBlock ]
-					             ifNotEmpty: [ self sortBlockFor: val1 anyOne ].
-
 				rejectBlock := [ :e | e name = 'clone' ].
-
 				val1 := val1 reject: rejectBlock.
 				val2 := val2 reject: rejectBlock.
-
+				
+				sortBlock := self sort.
 				val1 := val1 sorted: sortBlock.
 				val2 := val2 sorted: sortBlock ].
 
