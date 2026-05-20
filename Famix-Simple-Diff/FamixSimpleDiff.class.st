@@ -427,12 +427,6 @@ FamixSimpleDiff >> sort [
 ]
 
 { #category : 'sorting' }
-FamixSimpleDiff >> sortBlock [
-
-	^ [ :a :b | a mooseName > b mooseName ]
-]
-
-{ #category : 'sorting' }
 FamixSimpleDiff >> sortedChildren: entity [
 
 	^ childrenCache at: entity ifAbsentPut: [
