@@ -29,72 +29,6 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
-	| properties relations diff isEquals allProperties |
-	isEquals := true.
-	allProperties := aFamixEntity mooseDescription allProperties.
-
-	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
-	aFamixEntity class = otherFamixEntity class ifFalse: [
-			diff := FamixSimpleDifference
-				        createEntityChanged: otherFamixEntity
-				        expectedValue: aFamixEntity class name
-				        actualValue: otherFamixEntity class name.
-			self addDifference: diff.
-			^ self fail ].
-
-	"Comparing properties using Moose meta models" 
-	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list" 
-	properties := allProperties select: [ :property |
-			              property type isPrimitive and: [
-				              property isDerived not and: [
-					              (property name beginsWith: 'numberOf') not ] ] ].
-
-	"we read property values, and create a difference if they are not equals"
-	properties do: [ :p |
-		| property1 property2 |
-		propertiesCounter := propertiesCounter + 1.
-		property1 := p getRawFrom: aFamixEntity.
-		property2 := p getRawFrom: otherFamixEntity.
-		property1 = property2 ifFalse: [
-				diff := FamixSimpleDifference
-					        createPropertyChanged: otherFamixEntity
-					        expectedValue: property1
-					        actualValue: property2.
-				self addDifference: diff.
-				isEquals := false ] ].
-
-	"Comparing relations using Moose meta models"
-	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
-	relations := allProperties select: [ :property |
-			             property type isPrimitive not and: [
-					             property name ~= 'sourceAnchor' and: [
-						             self shouldCompareRelation: property ] ] ].
-			
-	"debug, si clé pas dans dico on ajoute"
-	"key -> classe"
-	"value -> property et relation"
-	inspectedClasses at: aFamixEntity class name ifAbsentPut: 
-	[ 
-		Dictionary new
-		at: 'properties' put: (properties);
-		at: 'relations' put: (relations);
-		yourself 
-	].
-		
-	relations do: [ :r |
-			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
-				ifFalse: [ isEquals := false ] ].
-
-	"we stop the execution here if models are differents"
-	isEquals ifFalse: [ ^ self fail ].
-
-	"Every slot value are equal, the entities are identical"
-	^ true
-]
-
-{ #category : 'comparing' }
-FamixSimpleDiff >> compareEntityOptimised: aFamixEntity to: otherFamixEntity [
-
 	| diff isEquals |
 	isEquals := true.
 
@@ -107,8 +41,8 @@ FamixSimpleDiff >> compareEntityOptimised: aFamixEntity to: otherFamixEntity [
 			self addDifference: diff.
 			^ self fail ].
 
-	aFamixEntity mooseDescription allPropertiesDo: [ :prop |
-		isEquals := isEquals & (self compareEntityOptimised: aFamixEntity to: otherFamixEntity property: prop)
+	aFamixEntity mooseDescription allProperties do: [ :prop |
+		isEquals := isEquals & (self compareEntity: aFamixEntity to: otherFamixEntity property: prop)
 	].
 
 	"we stop the execution here if models are differents"
@@ -119,7 +53,7 @@ FamixSimpleDiff >> compareEntityOptimised: aFamixEntity to: otherFamixEntity [
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareEntityOptimised: aFamixEntity to: otherFamixEntity property: property [
+FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: property [
 	"Comparing properties using Moose meta models"
 
 	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
@@ -146,12 +80,12 @@ FamixSimpleDiff >> compareEntityOptimised: aFamixEntity to: otherFamixEntity pro
 	"Comparing relations using Moose meta models"
 	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
 	(property type isPrimitive not and: [
-					             property name ~= 'sourceAnchor' and: [
-						             self shouldCompareRelation: property ] ])
-			ifTrue: [ 
-					
-			^(self compareRelation: property from: aFamixEntity to: otherFamixEntity)
-				 ].
+			 property name ~= 'sourceAnchor' and: [
+				 self shouldCompareRelation: property ] ]) ifTrue: [
+			^ self
+				  compareRelation: property
+				  from: aFamixEntity
+				  to: otherFamixEntity ].
 
 	"The property is not a property nor a relation..."
 	^ true
@@ -445,7 +379,7 @@ FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
 	entity1 name = 'clone' ifTrue: [ ^ true ].
 
-	(self compareEntityOptimised: entity1 to: entity2) ifFalse: [ ^ false ].
+	(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
 
 	(self sortedChildren: entity1)
 		with: (self sortedChildren: entity2)
