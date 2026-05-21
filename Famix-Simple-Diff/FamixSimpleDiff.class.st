@@ -12,10 +12,7 @@ Class {
 		'roots',
 		'childrenCache',
 		'debug',
-		'differences',
-		'relationCounter',
-		'propertiesCounter',
-		'inspectedClasses'
+		'differences'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
@@ -62,7 +59,6 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 			 property isDerived not and: [
 				 (property name beginsWith: 'numberOf') not ] ]) ifTrue: [ "we read property values, and create a difference if they are not equals"
 			| diff property1 property2 |
-			propertiesCounter := propertiesCounter + 1.
 			property1 := property getRawFrom: aFamixEntity.
 			property2 := property getRawFrom: otherFamixEntity.
 			property1 = property2
@@ -94,9 +90,6 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 { #category : 'comparing' }
 FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 
-	relationCounter := 0.
-	propertiesCounter := 0.
-
 	(self entityRoots: aFamixJavaModel) do: [ :root |
 			| correspondingRoot |
 			correspondingRoot := self
@@ -112,7 +105,6 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: otherFamixEntity [
 
 	| val1 val2 sortBlock |
-	relationCounter := relationCounter + 1.
 	aRelationDescription isMultivalued
 		ifFalse: ["toOne relation"
 				val1 := aRelationDescription getRawFrom: aFamixEntity.
@@ -336,9 +328,6 @@ FamixSimpleDiff >> initialize [
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
 	differences := OrderedCollection new.
-	relationCounter := 0.
-	propertiesCounter := 0.
-	inspectedClasses := Dictionary new.
 ]
 
 { #category : 'path-computing' }
