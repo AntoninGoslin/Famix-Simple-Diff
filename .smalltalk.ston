@@ -6,4 +6,7 @@ SmalltalkCISpec {
       #onConflict : #useIncoming
     }
   ]
+  #testing : {
+    #packages : [ 'Famix-Simple-Diff-Tests' ]
+  }
 }
