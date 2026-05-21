@@ -5,5 +5,8 @@ SmalltalkCISpec {
       #directory : '',
       #onConflict : #useIncoming
     }
-  ]
+  ],
+  #testing : {
+    #packages : [ 'Famix-Simple-Diff-Tests' ]
+  }
 }
