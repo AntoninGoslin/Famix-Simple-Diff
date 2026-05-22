@@ -4,8 +4,8 @@ This test class contains all the test cases focused on validating the difference
 Class {
 	#name : 'FamixSimpleDifferenceTest',
 	#superclass : 'TestCase',
-	#category : 'Famix-Simple-Diff',
-	#package : 'Famix-Simple-Diff'
+	#category : 'Famix-Simple-Diff-Tests',
+	#package : 'Famix-Simple-Diff-Tests'
 }
 
 { #category : 'tests' }
@@ -87,5 +87,5 @@ FamixSimpleDifferenceTest >> testPrintOn [
 	expectedString := 'a FamixSimpleDifferenceEntityAddition(''Entity Addition'' -> Expected: Nothing | Actual: ''Actual'' | On: ''Entity'')'.
 	
 	"strings should be equals"
-	self assert: output equals: expectedString.
+	self assert: output equals: expectedString. 
 ]

@@ -11,8 +11,8 @@ Class {
 		'mainModel2',
 		'libraryModel'
 	],
-	#category : 'Famix-Simple-Diff',
-	#package : 'Famix-Simple-Diff'
+	#category : 'Famix-Simple-Diff-Tests',
+	#package : 'Famix-Simple-Diff-Tests'
 }
 
 { #category : 'running' }
@@ -238,7 +238,7 @@ FamixSimpleDiffAutoTest >> testSortBlockOrdersByName [
 	| sd block entity1 entity2 |
 	sd := FamixSimpleDiff new.
 	
-	block := [ :a :b | a mooseName > b mooseName ].
+	block := sd sortBlock.
 	
 	entity1 := mainModel1 entityNamed: 'some.thing.whatever.MainClass'.
 	entity2 := mainModel1 entityNamed: 'some.thing.whatever.MainClass.getIntAttribute()'.

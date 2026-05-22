@@ -304,7 +304,7 @@ FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
 			self addDifference: diff.
 			modelsAreDifferents := true ].
 
-	^ modelsAreDifferents
+	^ modelsAreDifferents 
 ]
 
 { #category : 'accessing' }
