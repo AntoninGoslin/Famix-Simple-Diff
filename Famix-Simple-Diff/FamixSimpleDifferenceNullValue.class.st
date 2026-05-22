@@ -24,5 +24,5 @@ FamixSimpleDifferenceNullValue >> name [
 
 { #category : 'printing' }
 FamixSimpleDifferenceNullValue >> printOn: aStream [
-	aStream nextPutAll: 'Nothing'
+	aStream nextPutAll: 'Nothing' 
 ]

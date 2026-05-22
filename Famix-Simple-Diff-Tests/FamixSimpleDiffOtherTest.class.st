@@ -4,8 +4,8 @@ This test class contains all the test cases that do not require building models.
 Class {
 	#name : 'FamixSimpleDiffOtherTest',
 	#superclass : 'TestCase',
-	#category : 'Famix-Simple-Diff',
-	#package : 'Famix-Simple-Diff'
+	#category : 'Famix-Simple-Diff-Tests',
+	#package : 'Famix-Simple-Diff-Tests'
 }
 
 { #category : 'tests' }

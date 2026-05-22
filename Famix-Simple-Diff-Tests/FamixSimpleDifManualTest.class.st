@@ -5,8 +5,8 @@ This approach allows us to isolate and test specific cases that are too complica
 Class {
 	#name : 'FamixSimpleDifManualTest',
 	#superclass : 'TestCase',
-	#category : 'Famix-Simple-Diff',
-	#package : 'Famix-Simple-Diff'
+	#category : 'Famix-Simple-Diff-Tests',
+	#package : 'Famix-Simple-Diff-Tests'
 }
 
 { #category : 'running' }

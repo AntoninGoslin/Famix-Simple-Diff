@@ -11,8 +11,8 @@ Class {
 		'mainModel2',
 		'libraryModel'
 	],
-	#category : 'Famix-Simple-Diff',
-	#package : 'Famix-Simple-Diff'
+	#category : 'Famix-Simple-Diff-Tests',
+	#package : 'Famix-Simple-Diff-Tests'
 }
 
 { #category : 'running' }
