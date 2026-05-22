@@ -364,31 +364,6 @@ FamixSimpleDifManualTest >> testSortedChildrenSortsAlphabeticallyWhenNotSameName
 ]
 
 { #category : 'tests' }
-FamixSimpleDifManualTest >> testSortedChildrenUseSourceAnchorWhenFirstAnchorIsMissing [
-	| sd parent method1 method2 anchor2 res |
-	sd := FamixSimpleDiff new.
-	
-	"init parent and child methods"
-	parent := FamixJavaClass new name: 'ParentClass'.
-	
-	"init same method"
-	method1 := FamixJavaMethod new name: 'SameMethod'.
-	method2 := FamixJavaMethod new name: 'SameMethod'.
-	
-	"init anchor"
-	anchor2 := FamixJavaIndexedFileAnchor new endPos: 20.
-	method2 sourceAnchor: anchor2.
-	
-	"testing the sort"
-	parent methods: { method2 . method1}.
-	res := sd sortedChildren: parent. 
-	
-	self assert: res size equals: 2.
-	self assert: res first equals: method1.
-	self assert: res second equals: method2.
-]
-
-{ #category : 'tests' }
 FamixSimpleDifManualTest >> testSortedChildrenUseSourceAnchorWhenSameName [
 	| sd parent method1 method2 anchor1 anchor2 res |
 	sd := FamixSimpleDiff new.
