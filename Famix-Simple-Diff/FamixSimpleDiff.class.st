@@ -26,7 +26,7 @@ FamixSimpleDiff >> addDifference: aFamixDiff [
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
-	| properties relations diff isEquals |
+	| diff isEquals |
 	isEquals := true.
 
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
@@ -38,40 +38,52 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 			self addDifference: diff.
 			^ self fail ].
 
-	"Comparing properties using Moose meta models" 
-	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties and the numberOfLinesOfCode to not pollute difference list" 
-	properties := aFamixEntity mooseDescription allProperties select: [ :property |
-			              property type isPrimitive and: [
-				              property isDerived not and: [
-					              property name ~= 'numberOfLinesOfCode' ] ] ].
-
-	"we read property values, and create a difference if they are not equals"
-	properties do: [ :p |
-		| property1 property2 |
-		property1 := p getRawFrom: aFamixEntity.
-		property2 := p getRawFrom: otherFamixEntity.
-		property1 = property2 ifFalse: [
-				diff := FamixSimpleDifference
-					        createPropertyChanged: otherFamixEntity
-					        expectedValue: property1
-					        actualValue: property2.
-				self addDifference: diff.
-				isEquals := false ] ].
-
-	"Comparing relations using Moose meta models"
-	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
-	relations := aFamixEntity mooseDescription allProperties select: [ :property |
-			             property type isPrimitive not and: [
-				          	property name ~= 'sourceAnchor' ] ].
-
-	relations do: [ :r |
-			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
-				ifFalse: [ isEquals := false ] ].
+	aFamixEntity mooseDescription allProperties do: [ :prop |
+		isEquals := isEquals & (self compareEntity: aFamixEntity to: otherFamixEntity property: prop)
+	].
 
 	"we stop the execution here if models are differents"
 	isEquals ifFalse: [ ^ self fail ].
 
 	"Every slot value are equal, the entities are identical"
+	^ true
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: property [
+	"Comparing properties using Moose meta models"
+
+	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
+
+	(property type isPrimitive and: [
+			 property isDerived not and: [
+				 (property name beginsWith: 'numberOf') not ] ]) ifTrue: [ "we read property values, and create a difference if they are not equals"
+			| diff property1 property2 |
+			property1 := property getRawFrom: aFamixEntity.
+			property2 := property getRawFrom: otherFamixEntity.
+			property1 = property2
+				ifFalse: [
+						diff := FamixSimpleDifference
+							        createPropertyChanged: otherFamixEntity
+							        expectedValue: property1
+							        actualValue: property2.
+						self addDifference: diff.
+						^ false ]
+				ifTrue: [ ^ true ] ].
+
+
+
+	"Comparing relations using Moose meta models"
+	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
+	(property type isPrimitive not and: [
+			 property name ~= 'sourceAnchor' and: [
+				 self shouldCompareRelation: property ] ]) ifTrue: [
+			^ self
+				  compareRelation: property
+				  from: aFamixEntity
+				  to: otherFamixEntity ].
+
+	"The property is not a property nor a relation..."
 	^ true
 ]
 
@@ -102,15 +114,11 @@ FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: 
 				val1 := (aRelationDescription getRawFrom: aFamixEntity) asOrderedCollection.
 				val2 := (aRelationDescription getRawFrom: otherFamixEntity) asOrderedCollection.
 
-				sortBlock := val1
-					             ifEmpty: [ self sortBlock ]
-					             ifNotEmpty: [ self sortBlockFor: val1 anyOne ].
-
 				rejectBlock := [ :e | e name = 'clone' ].
-
 				val1 := val1 reject: rejectBlock.
 				val2 := val2 reject: rejectBlock.
-
+				
+				sortBlock := self sort.
 				val1 := val1 sorted: sortBlock.
 				val2 := val2 sorted: sortBlock ].
 
@@ -262,7 +270,7 @@ FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 { #category : 'accessing' }
 FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 
-	| goodSortBlock excludedClasses |
+	| excludedClasses |
 	excludedClasses := {
 		                   FamixJavaWildcard.
 		                   FamixJavaAnnotationInstance.
@@ -275,8 +283,7 @@ FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 				  rootEntities := aFamixJavaModel rootEntities reject: [ :entity |
 						                  entity name = '<Default Package>' or: [
 							                  excludedClasses includes: entity class ] ].
-				  goodSortBlock := self sortBlockFor: rootEntities anyOne.
-				  rootEntities sorted: goodSortBlock ]
+				  rootEntities sorted: self sort ]
 ]
 
 { #category : 'asserting' }
@@ -320,7 +327,7 @@ FamixSimpleDiff >> initialize [
 	super initialize.
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
-	differences := OrderedCollection new
+	differences := OrderedCollection new.
 ]
 
 { #category : 'path-computing' }
@@ -372,46 +379,45 @@ FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 	^ true
 ]
 
-{ #category : 'sorting' }
-FamixSimpleDiff >> sortBlock [
+{ #category : 'comparing' }
+FamixSimpleDiff >> shouldCompareRelation: aFM3Property [
+	"We use this filter to avoid comparing the same relation. Here is the idea:
+	. A relation without opposite is important, so we keep it.
+	. If we have a multivalued relation on a side, and a non multivalued relation on the other side, we keep the multivalued one.
+	. If both are multivalued, we check if one side is derived. In this case we keep the derived one."
 
-	^ [ :a :b | a mooseName > b mooseName ]
+	| oppositeRelation |
+	aFM3Property hasOpposite ifFalse: [ ^ true ].
+
+	oppositeRelation := aFM3Property opposite.
+
+	^ aFM3Property isMultivalued ~= oppositeRelation isMultivalued
+		  ifTrue: [ aFM3Property isMultivalued ]
+		  ifFalse: [ aFM3Property isDerived ]
 ]
 
 { #category : 'sorting' }
-FamixSimpleDiff >> sortBlockFor: anEntity [
+FamixSimpleDiff >> sort [
+	"We use mooseName to sort the entities.
+	If names are identical, we use sorceAnchor"
 
-	^ anEntity hasUniqueMooseNameInModel
-		  ifTrue: [ [ :a :b | a mooseName < b mooseName ] ]
-		  ifFalse: [
-				  [ :a :b |
-					  | valA valB |
-					  valA := String streamContents: [ :s | a printOn: s ].
-					  valB := String streamContents: [ :s | b printOn: s ].
-					  valA < valB ] ]
+	^ [ :a :b |
+		  | nameA nameB |
+		  nameA := a mooseName.
+		  nameB := b mooseName.
+
+		  nameA = nameB
+			  ifTrue: [
+					  (a sourceAnchor notNil and: [ b sourceAnchor notNil ])
+						  ifTrue: [ a sourceAnchor endPos < b sourceAnchor endPos ] "sorting the source anchors"
+						  ifFalse: [ a sourceAnchor notNil ] ]
+			  ifFalse: [ nameA < nameB ] ] "alphabetical order sorting"
 ]
 
 { #category : 'sorting' }
 FamixSimpleDiff >> sortedChildren: entity [
 
-	| res |
-	res := childrenCache at: entity ifAbsentPut: [
-			       (entity containedEntities reject: [ :e |
-				        e isStub or: [ e name = '<Initializer>' ] ]) sorted: [ :a :b |
-					       | valA valB |
-					       valA := String streamContents: [ :s | a printOn: s ].
-					       valB := String streamContents: [ :s | b printOn: s ].
-					       valA = valB
-						       ifTrue: [
-								       a sourceAnchor
-									       ifNotNil: [
-											       b sourceAnchor
-												       ifNotNil: [ "case for two entities with identical printing string but different source anchor (several inner classes in the same parent for example)"
-													       a sourceAnchor endPos < b sourceAnchor endPos ]
-												       ifNil: [ valA < valB ] ]
-									       ifNil: [ valA < valB ] ]
-						       ifFalse: [ valA < valB ] ] ].
-
-
-	^ res
+	^ childrenCache at: entity ifAbsentPut: [
+			  (entity containedEntities reject: [ :e |
+				   e isStub or: [ e name = '<Initializer>' ] ]) sorted: self sort ]
 ]
