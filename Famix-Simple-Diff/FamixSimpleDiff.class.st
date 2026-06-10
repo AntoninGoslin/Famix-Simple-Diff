@@ -38,9 +38,13 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 			self addDifference: diff.
 			^ self fail ].
 
-	aFamixEntity mooseDescription allProperties do: [ :prop |
-		isEquals := isEquals & (self compareEntity: aFamixEntity to: otherFamixEntity property: prop)
-	].
+	aFamixEntity metadescription allPropertiesDo: [ :prop |
+			isEquals := isEquals
+			            &
+			            (self
+				             compareEntity: aFamixEntity
+				             to: otherFamixEntity
+				             property: prop) ].
 
 	"we stop the execution here if models are differents"
 	isEquals ifFalse: [ ^ self fail ].
