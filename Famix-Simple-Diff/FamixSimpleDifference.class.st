@@ -115,6 +115,11 @@ FamixSimpleDifference >> printOn: aStream [
 	aStream nextPutAll: '('.
 	aStream print: self changeTypeName.
 	
+	self propertyName ifNotNil: [ 
+		aStream nextPutAll: 'Property Name: ';
+				  nextPutAll: self propertyName asString
+	].
+	
 	aStream 
 		nextPutAll: ' -> Expected: '; 
 		print: expectedValue;
