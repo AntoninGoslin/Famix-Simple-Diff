@@ -13,7 +13,8 @@ Class {
 	#instVars : [
 		'entity',
 		'expectedValue',
-		'actualValue'
+		'actualValue',
+		'propertyName'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
@@ -123,4 +124,16 @@ FamixSimpleDifference >> printOn: aStream [
 	aStream nextPutAll: ' | On: '.
 	aStream print: entity.
 	aStream nextPutAll: ')'.
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifference >> propertyName [
+
+	^ propertyName
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifference >> propertyName: anObject [
+
+	^ propertyName := anObject
 ]
