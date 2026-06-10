@@ -94,12 +94,30 @@ FamixSimpleDifferenceTest >> testNullValues [
 
 { #category : 'accessing' }
 FamixSimpleDifferenceTest >> testPrintOn [
+
 	| additionDiff output expectedString |
-	
-	additionDiff := FamixSimpleDifference createEntityAdded: 'Entity' actualValue: 'Actual'.
+	additionDiff := FamixSimpleDifference
+		                createEntityAdded: 'Entity'
+		                actualValue: 'Actual'.
 	output := additionDiff printString.
 	expectedString := 'a FamixSimpleDifferenceEntityAddition(''Entity Addition'' -> Expected: Nothing | Actual: ''Actual'' | On: ''Entity'')'.
-	
+
 	"strings should be equals"
-	self assert: output equals: expectedString. 
+	self assert: output equals: expectedString
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifferenceTest >> testPrintOnWithPropertyName [
+
+	| diff output expectedString |
+	diff := FamixSimpleDifference
+		        createPropertyChanged: 'modifiers'
+		        entity: 'Entity'
+		        expectedValue: 'public'
+		        actualValue: 'private'.
+
+	output := diff printString.
+	expectedString := 'a FamixSimpleDifferencePropertyChanged(''Property Changed''| Property Name: modifiers -> Expected: ''public'' | Actual: ''private'' | On: ''Entity'')'.
+
+	self assert: output equals: expectedString
 ]
