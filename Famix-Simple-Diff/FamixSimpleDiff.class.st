@@ -38,9 +38,13 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 			self addDifference: diff.
 			^ self fail ].
 
-	aFamixEntity mooseDescription allProperties do: [ :prop |
-		isEquals := isEquals & (self compareEntity: aFamixEntity to: otherFamixEntity property: prop)
-	].
+	aFamixEntity metadescription allPropertiesDo: [ :prop |
+			isEquals := isEquals
+			            &
+			            (self
+				             compareEntity: aFamixEntity
+				             to: otherFamixEntity
+				             property: prop) ].
 
 	"we stop the execution here if models are differents"
 	isEquals ifFalse: [ ^ self fail ].
@@ -64,7 +68,8 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 			property1 = property2
 				ifFalse: [
 						diff := FamixSimpleDifference
-							        createPropertyChanged: otherFamixEntity
+							        createPropertyChanged: property name
+							        entity: otherFamixEntity
 							        expectedValue: property1
 							        actualValue: property2.
 						self addDifference: diff.
@@ -106,18 +111,20 @@ FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: 
 
 	| val1 val2 sortBlock |
 	aRelationDescription isMultivalued
-		ifFalse: ["toOne relation"
+		ifFalse: [ "toOne relation"
 				val1 := aRelationDescription getRawFrom: aFamixEntity.
 				val2 := aRelationDescription getRawFrom: otherFamixEntity ]
-		ifTrue: ["toMany relation"
+		ifTrue: [ "toMany relation"
 				| rejectBlock |
-				val1 := (aRelationDescription getRawFrom: aFamixEntity) asOrderedCollection.
-				val2 := (aRelationDescription getRawFrom: otherFamixEntity) asOrderedCollection.
+				val1 := (aRelationDescription getRawFrom: aFamixEntity)
+					        asOrderedCollection.
+				val2 := (aRelationDescription getRawFrom: otherFamixEntity)
+					        asOrderedCollection.
 
 				rejectBlock := [ :e | e name = 'clone' ].
 				val1 := val1 reject: rejectBlock.
 				val2 := val2 reject: rejectBlock.
-				
+
 				sortBlock := self sort.
 				val1 := val1 sorted: sortBlock.
 				val2 := val2 sorted: sortBlock ].
@@ -128,10 +135,11 @@ FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: 
 
 	^ aRelationDescription isMultivalued
 		  ifFalse: [
-			  self
-				  compareToOneRelation: val1
-				  actual: val2
-				  target: otherFamixEntity ]
+				  self
+					  compareToOneRelation: val1
+					  actual: val2
+					  target: otherFamixEntity
+					  relation: aRelationDescription ]
 		  ifTrue: [
 			  self
 				  compareToManyRelation: val1
@@ -197,14 +205,16 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity [
+FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity relation: aRelationDescription [
 
 	| areEquals diff |
 	"if we dont have the same relations, so it changed, we have to record it"
-	areEquals := (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2).
+	areEquals := (self pathesForMaybeMultiRelation: val1)
+	             = (self pathesForMaybeMultiRelation: val2).
 	areEquals ifFalse: [
 			diff := FamixSimpleDifference
-				        createRelationChanged: anEntity
+				        createRelationChanged: aRelationDescription name
+				        entity: anEntity
 				        expectedValue: val1
 				        actualValue: val2.
 			self addDifference: diff ].

@@ -34,18 +34,32 @@ FamixSimpleDifferenceTest >> testChangeTypeNameEntityDeletion [
 
 { #category : 'tests' }
 FamixSimpleDifferenceTest >> testChangeTypeNamePropertyChanged [
+
 	| propertyChanged |
-	propertyChanged := FamixSimpleDifference createPropertyChanged: 'Entity' expectedValue: 'Expected' actualValue: 'Actual'.
-	
-	self assert: propertyChanged changeTypeName equals: 'Property Changed'.
+	propertyChanged := FamixSimpleDifference
+		                   createPropertyChanged: '#name'
+		                   entity: 'Entity'
+		                   expectedValue: 'Expected'
+		                   actualValue: 'Actual'.
+
+	self
+		assert: propertyChanged changeTypeName
+		equals: 'Property Changed'
 ]
 
 { #category : 'tests' }
 FamixSimpleDifferenceTest >> testChangeTypeNameRelationChanged [
+
 	| relationChanged |
-	relationChanged := FamixSimpleDifference createRelationChanged: 'Entity' expectedValue: 'Expected' actualValue: 'Actual'.
-	
-	self assert: relationChanged changeTypeName equals: 'Relation Changed'.
+	relationChanged := FamixSimpleDifference
+		                   createRelationChanged: '#name'
+		                   entity: 'Entity'
+		                   expectedValue: 'Expected'
+		                   actualValue: 'Actual'.
+
+	self
+		assert: relationChanged changeTypeName
+		equals: 'Relation Changed'
 ]
 
 { #category : 'tests' }
@@ -80,12 +94,30 @@ FamixSimpleDifferenceTest >> testNullValues [
 
 { #category : 'accessing' }
 FamixSimpleDifferenceTest >> testPrintOn [
+
 	| additionDiff output expectedString |
-	
-	additionDiff := FamixSimpleDifference createEntityAdded: 'Entity' actualValue: 'Actual'.
+	additionDiff := FamixSimpleDifference
+		                createEntityAdded: 'Entity'
+		                actualValue: 'Actual'.
 	output := additionDiff printString.
 	expectedString := 'a FamixSimpleDifferenceEntityAddition(''Entity Addition'' -> Expected: Nothing | Actual: ''Actual'' | On: ''Entity'')'.
-	
+
 	"strings should be equals"
-	self assert: output equals: expectedString. 
+	self assert: output equals: expectedString
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifferenceTest >> testPrintOnWithPropertyName [
+
+	| diff output expectedString |
+	diff := FamixSimpleDifference
+		        createPropertyChanged: 'modifiers'
+		        entity: 'Entity'
+		        expectedValue: 'public'
+		        actualValue: 'private'.
+
+	output := diff printString.
+	expectedString := 'a FamixSimpleDifferencePropertyChanged(''Property Changed''| Property Name: modifiers -> Expected: ''public'' | Actual: ''private'' | On: ''Entity'')'.
+
+	self assert: output equals: expectedString
 ]

@@ -13,55 +13,63 @@ Class {
 	#instVars : [
 		'entity',
 		'expectedValue',
-		'actualValue'
+		'actualValue',
+		'propertyName'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualValue [ 
+FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualValue [
+
 	^ FamixSimpleDifferenceEntityAddition new
-		entity: anEntity;
-		expectedValue: FamixSimpleDifferenceNullValue new;
-		actualValue: actualValue;
-		yourself
+		  entity: anEntity;
+		  expectedValue: FamixSimpleDifferenceNullValue new;
+		  actualValue: actualValue;
+		  yourself
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [
+
 	^ FamixSimpleDifferenceEntityChanged new
-		entity: anEntity; 
-		expectedValue: expectedValue;
-		actualValue: actualValue;
-		yourself 
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: actualValue;
+		  yourself
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: expectedValue [ 
+FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: expectedValue [
+
 	^ FamixSimpleDifferenceEntityDeletion new
-		entity: anEntity;
-		expectedValue: expectedValue;
-		actualValue: FamixSimpleDifferenceNullValue new;
-		yourself 
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: FamixSimpleDifferenceNullValue new;
+		  yourself
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createPropertyChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+FamixSimpleDifference class >> createPropertyChanged: aPropertyName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
+
 	^ FamixSimpleDifferencePropertyChanged new
-		entity: anEntity; 
-		expectedValue: expectedValue;
-		actualValue: actualValue;
-		yourself 
+		  propertyName: aPropertyName;
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: actualValue;
+		  yourself
 ]
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [ 
+FamixSimpleDifference class >> createRelationChanged: aRelationName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
+
 	^ FamixSimpleDifferenceRelationChanged new
-		entity: anEntity;
-		expectedValue: expectedValue;
-		actualValue: actualValue;
-		yourself
+		  propertyName: aRelationName;
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: actualValue;
+		  yourself
 ]
 
 { #category : 'accessing' }
@@ -108,11 +116,16 @@ FamixSimpleDifference >> expectedValue: anObject [
 
 { #category : 'printing' }
 FamixSimpleDifference >> printOn: aStream [
-	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
+	"Will build a Stream like:a FamixSimpleDifferenceEntityAddition(Entity Addition -> Expected: Nothing | Actual: 'Actual' | On: Entity)"
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
 	aStream print: self changeTypeName.
+	
+	self propertyName ifNotNil: [ 
+		aStream nextPutAll: '| Property Name: ';
+				  nextPutAll: self propertyName asString
+	].
 	
 	aStream 
 		nextPutAll: ' -> Expected: '; 
@@ -123,4 +136,16 @@ FamixSimpleDifference >> printOn: aStream [
 	aStream nextPutAll: ' | On: '.
 	aStream print: entity.
 	aStream nextPutAll: ')'.
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifference >> propertyName [
+
+	^ propertyName
+]
+
+{ #category : 'accessing' }
+FamixSimpleDifference >> propertyName: anObject [
+
+	^ propertyName := anObject
 ]
