@@ -116,7 +116,7 @@ FamixSimpleDifference >> expectedValue: anObject [
 
 { #category : 'printing' }
 FamixSimpleDifference >> printOn: aStream [
-	"Will build a Stream like: FamixDiff(Addition -> Expected: ' ' | Actual: 'private int something' | On Class1)"
+	"Will build a Stream like:a FamixSimpleDifferenceEntityAddition(Entity Addition -> Expected: Nothing | Actual: 'Actual' | On: Entity)"
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
