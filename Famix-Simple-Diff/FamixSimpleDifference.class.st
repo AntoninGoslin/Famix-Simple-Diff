@@ -72,16 +72,6 @@ FamixSimpleDifference class >> createRelationChanged: aRelationName entity: anEn
 		  yourself
 ]
 
-{ #category : 'instance creation' }
-FamixSimpleDifference class >> createRelationChanged: anEntity expectedValue: expectedValue actualValue: actualValue [
-
-	^ FamixSimpleDifferenceRelationChanged new
-		  entity: anEntity;
-		  expectedValue: expectedValue;
-		  actualValue: actualValue;
-		  yourself
-]
-
 { #category : 'accessing' }
 FamixSimpleDifference >> actualValue [
 

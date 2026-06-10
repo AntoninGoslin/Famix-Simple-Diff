@@ -34,18 +34,32 @@ FamixSimpleDifferenceTest >> testChangeTypeNameEntityDeletion [
 
 { #category : 'tests' }
 FamixSimpleDifferenceTest >> testChangeTypeNamePropertyChanged [
+
 	| propertyChanged |
-	propertyChanged := FamixSimpleDifference createPropertyChanged: '#name' entity: 'Entity' expectedValue: 'Expected' actualValue: 'Actual'.
-	
-	self assert: propertyChanged changeTypeName equals: 'Property Changed'.
+	propertyChanged := FamixSimpleDifference
+		                   createPropertyChanged: '#name'
+		                   entity: 'Entity'
+		                   expectedValue: 'Expected'
+		                   actualValue: 'Actual'.
+
+	self
+		assert: propertyChanged changeTypeName
+		equals: 'Property Changed'
 ]
 
 { #category : 'tests' }
 FamixSimpleDifferenceTest >> testChangeTypeNameRelationChanged [
+
 	| relationChanged |
-	relationChanged := FamixSimpleDifference createRelationChanged: 'Entity' expectedValue: 'Expected' actualValue: 'Actual'.
-	
-	self assert: relationChanged changeTypeName equals: 'Relation Changed'.
+	relationChanged := FamixSimpleDifference
+		                   createRelationChanged: '#name'
+		                   entity: 'Entity'
+		                   expectedValue: 'Expected'
+		                   actualValue: 'Actual'.
+
+	self
+		assert: relationChanged changeTypeName
+		equals: 'Relation Changed'
 ]
 
 { #category : 'tests' }
