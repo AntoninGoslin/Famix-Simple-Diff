@@ -68,7 +68,8 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 			property1 = property2
 				ifFalse: [
 						diff := FamixSimpleDifference
-							        createPropertyChanged: otherFamixEntity
+							        createPropertyChanged: property name
+							        entity: otherFamixEntity
 							        expectedValue: property1
 							        actualValue: property2.
 						self addDifference: diff.
