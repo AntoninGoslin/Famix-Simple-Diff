@@ -94,16 +94,43 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
+	"Will compare two models iteratively using the worklist algorithm"
 
+	| worklist visited |
+	worklist := OrderedCollection new.
+	visited := IdentitySet new.
+
+	"worklist initialisation"
 	(self entityRoots: aFamixJavaModel) do: [ :root |
 			| correspondingRoot |
-			correspondingRoot := self
-				                     correspondingEntityTo: root
-				                     in: aFamixJavaModel2.
-			(self recursiveCompareEntity: root with: correspondingRoot)
-				ifFalse: [ ^ self fail ] ].
+			correspondingRoot := self correspondingEntityTo: root in: aFamixJavaModel2.
+			worklist addLast: {root . correspondingRoot } ].
 
-	^ true
+	"doing tasks until the tasklist is empty"
+	[ worklist isEmpty ] whileFalse: [
+			| currentTask entity1 entity2 |
+			currentTask := worklist removeFirst.
+			entity1 := currentTask first.
+			entity2 := currentTask second.
+
+			"new task case"
+			(visited includes: entity1) ifFalse: [
+					visited add: entity1.
+
+					"filter for strange cases"
+					"TODO"
+
+					(self compareEntity: entity1 to: entity2) ifFalse: [ ^ self fail ].
+
+					"complete worklist"
+					(self sortedChildren: entity1)
+						with: (self sortedChildren: entity2)
+						do: [ :child1 :child2 |
+								worklist add: {child1 . child2 } ]
+			] 
+		].
+	
+		^ true
 ]
 
 { #category : 'comparing' }
