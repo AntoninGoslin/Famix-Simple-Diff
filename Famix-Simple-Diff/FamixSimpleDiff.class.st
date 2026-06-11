@@ -118,7 +118,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 					visited add: entity1.
 
 					"filter for strange cases"
-					(self shouldSkipComparisonEntity: entity1 with: entity1)
+					(self shouldSkipComparisonEntity: entity1 with: entity2)
 						ifFalse: [
 								(self compareEntity: entity1 to: entity2) ifFalse: [^ self fail ].
 
