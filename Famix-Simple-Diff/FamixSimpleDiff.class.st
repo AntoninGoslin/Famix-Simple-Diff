@@ -104,7 +104,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 	(self entityRoots: aFamixJavaModel) do: [ :root |
 			| correspondingRoot |
 			correspondingRoot := self correspondingEntityTo: root in: aFamixJavaModel2.
-			worklist addLast: {root . correspondingRoot } ].
+			worklist addLast: { root. correspondingRoot } ].
 
 	"doing tasks until the tasklist is empty"
 	[ worklist isEmpty ] whileFalse: [
@@ -118,19 +118,16 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 					visited add: entity1.
 
 					"filter for strange cases"
-					"TODO"
+					(self shouldSkipComparisonEntity: entity1 with: entity1)
+						ifFalse: [
+								(self compareEntity: entity1 to: entity2) ifFalse: [^ self fail ].
 
-					(self compareEntity: entity1 to: entity2) ifFalse: [ ^ self fail ].
-
-					"complete worklist"
-					(self sortedChildren: entity1)
-						with: (self sortedChildren: entity2)
-						do: [ :child1 :child2 |
-								worklist add: {child1 . child2 } ]
-			] 
-		].
-	
-		^ true
+								"complete worklist"
+								(self sortedChildren: entity1)
+									with: (self sortedChildren: entity2)
+									do: [ :child1 :child2 |
+											worklist add: {child1 . child2 } ] ] ] ].
+	^ true
 ]
 
 { #category : 'comparing' }
@@ -431,6 +428,23 @@ FamixSimpleDiff >> shouldCompareRelation: aFM3Property [
 	^ aFM3Property isMultivalued ~= oppositeRelation isMultivalued
 		  ifTrue: [ aFM3Property isMultivalued ]
 		  ifFalse: [ aFM3Property isDerived ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> shouldSkipComparisonEntity: entity1 with: entity2 [
+	"Evaluates if an entities should be skiped due to edge case (parametric entities, anonymous classes, clone."
+
+	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
+	entity1 mooseName = entity2 mooseName ifTrue: [
+			(entity1 isParametricEntity and: [ entity2 isParametricEntity ])
+				ifTrue: [ ^ true ].
+			(entity1 isType and: [ entity1 isAnonymousClass ]) ifTrue: [
+				^ true ] ].
+
+	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
+	entity1 name = 'clone' ifTrue: [ ^ true ].
+	
+	^false
 ]
 
 { #category : 'sorting' }
