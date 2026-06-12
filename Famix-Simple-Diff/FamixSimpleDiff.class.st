@@ -98,7 +98,7 @@ FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
 
 	| worklist visited roots1 roots2|
 	
-	"we should have the same number of root"
+	"we should have the same number of root to compare models"
 	roots1 := self entityRoots: aFamixJavaModel.
 	roots2 := self entityRoots: aFamixJavaModel2.
 	roots1 size = roots2 size ifFalse: [ ^ self fail ].
