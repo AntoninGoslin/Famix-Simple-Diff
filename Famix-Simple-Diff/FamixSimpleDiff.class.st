@@ -93,24 +93,19 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
+FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 	"Will compare two models iteratively using the worklist algorithm"
 
 	| worklist visited roots1 roots2|
 	
-	"we should have the same number of root to compare models"
-	roots1 := self entityRoots: aFamixJavaModel.
-	roots2 := self entityRoots: aFamixJavaModel2.
+	"we should have the same number of root"
+	roots1 := self entityRoots: aFamixModel.
+	roots2 := self entityRoots: aFamixModel2.
 	roots1 size = roots2 size ifFalse: [ ^ self fail ].
 	
-	worklist := OrderedCollection new.
+	"Initalization"
+	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
 	visited := IdentitySet new.
-
-	"worklist initialisation"
-	(self entityRoots: aFamixJavaModel) do: [ :root |
-			| correspondingRoot |
-			correspondingRoot := self correspondingEntityTo: root in: aFamixJavaModel2.
-			worklist addLast: { root. correspondingRoot } ].
 
 	"doing tasks until the tasklist is empty"
 	[ worklist isEmpty ] whileFalse: [
@@ -368,6 +363,20 @@ FamixSimpleDiff >> initialize [
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
 	differences := OrderedCollection new.
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> initializeWorklistFrom: aFamixJavaModel to: aFamixJavaModel2 [
+	"worklist initialisation"
+
+	| worklist |
+	worklist := OrderedCollection new.
+	(self entityRoots: aFamixJavaModel) do: [ :root |
+			| correspondingRoot |
+			correspondingRoot := self correspondingEntityTo: root in: aFamixJavaModel2.
+			worklist addLast: {root . correspondingRoot } ].
+		
+	^ worklist 
 ]
 
 { #category : 'path-computing' }
