@@ -417,30 +417,6 @@ FamixSimpleDiff >> processNextTaskFrom: worklist visited: visited [
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
-
-	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
-	entity1 mooseName = entity2 mooseName ifTrue: [
-			(entity1 isParametricEntity and: [ entity2 isParametricEntity ])
-				ifTrue: [ ^ true ].
-			(entity1 isType and: [ entity1 isAnonymousClass ]) ifTrue: [
-				^ true ] ].
-
-	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
-	entity1 name = 'clone' ifTrue: [ ^ true ].
-
-	(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
-
-	(self sortedChildren: entity1)
-		with: (self sortedChildren: entity2)
-		do: [ :child1 :child2 |
-			(self recursiveCompareEntity: child1 with: child2) ifFalse: [
-				^ false ] ].
-
-	^ true
-]
-
-{ #category : 'comparing' }
 FamixSimpleDiff >> shouldCompareRelation: aFM3Property [
 	"We use this filter to avoid comparing the same relation. Here is the idea:
 	. A relation without opposite is important, so we keep it.
