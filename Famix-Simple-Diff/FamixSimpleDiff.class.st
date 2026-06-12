@@ -105,7 +105,7 @@ FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 	[ worklist isEmpty ] whileFalse: [
 			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
 				^ self fail ] ].
-	^ true
+	^ differences isEmpty
 ]
 
 { #category : 'comparing' }
