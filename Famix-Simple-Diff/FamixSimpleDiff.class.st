@@ -265,6 +265,15 @@ FamixSimpleDiff >> differences [
 	^ differences
 ]
 
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> enqueueRemainingTasksOf: entity1 and: entity2 into: worklist [
+
+	(self sortedChildren: entity1)
+		with: (self sortedChildren: entity2)
+		do: [ :child1 :child2 |
+				worklist add: { child1. child2 } ]
+]
+
 { #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 
@@ -403,12 +412,7 @@ FamixSimpleDiff >> processNextTaskFrom: worklist visited: visited [
 			(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
 
 			"complete worklist"
-			(self sortedChildren: entity1)
-				with: (self sortedChildren: entity2)
-				do: [ :child1 :child2 |
-						worklist add: {
-								child1.
-								child2 } ] ].
+			self enqueueRemainingTasksOf: entity1 and: entity2 into: worklist ].
 	^ true
 ]
 
