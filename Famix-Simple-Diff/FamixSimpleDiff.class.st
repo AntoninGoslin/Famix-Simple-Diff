@@ -226,12 +226,9 @@ FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity rela
 
 { #category : 'path-computing' }
 FamixSimpleDiff >> computePathOfEntity: anEntity [
-	"We only work for single parent entities... And we hope this is the case always.
-	If not, talk to Guille, he has a point.
-	Read about lexical definition"
 
 	self assert: anEntity containers asSet size <= 1.
-	
+
 	"If we have a container, we continue recursively"
 	anEntity containers asSet do: [ :c |
 			^ (self pathOfEntity: c) copyWith:
