@@ -96,38 +96,19 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 	"Will compare two models iteratively using the worklist algorithm"
 
-	| worklist visited roots1 roots2|
-	
+	| worklist visited roots1 roots2 |
 	"we should have the same number of root"
 	roots1 := self entityRoots: aFamixModel.
 	roots2 := self entityRoots: aFamixModel2.
 	roots1 size = roots2 size ifFalse: [ ^ self fail ].
-	
+
 	"Initalization"
 	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
 	visited := IdentitySet new.
 
 	"doing tasks until the tasklist is empty"
 	[ worklist isEmpty ] whileFalse: [
-			| currentTask entity1 entity2 |
-			currentTask := worklist removeFirst.
-			entity1 := currentTask first.
-			entity2 := currentTask second.
-
-			"new task case"
-			(visited includes: entity1) ifFalse: [
-					visited add: entity1.
-
-					"filter for strange cases"
-					(self shouldSkipComparisonEntity: entity1 with: entity2)
-						ifFalse: [
-								(self compareEntity: entity1 to: entity2) ifFalse: [^ self fail ].
-
-								"complete worklist"
-								(self sortedChildren: entity1)
-									with: (self sortedChildren: entity2)
-									do: [ :child1 :child2 |
-											worklist add: {child1 . child2 } ] ] ] ].
+			(self processNextTaskFrom: worklist visited: visited) ifFalse: [^ self fail ] ].
 	^ true
 ]
 
@@ -402,6 +383,33 @@ FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionO
 	^ targettedEntities collect: [ :e |
 		"Please e be an entity please please plz"
 		  self pathOfEntity: e ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> processNextTaskFrom: worklist visited: visited [
+
+	| currentTask entity1 entity2 |
+	currentTask := worklist removeFirst.
+	entity1 := currentTask first.
+	entity2 := currentTask second.
+
+	"new task case"
+	(visited includes: entity1) ifFalse: [
+			visited add: entity1.
+
+			"filter for strange cases"
+			(self shouldSkipComparisonEntity: entity1 with: entity2) ifTrue: [^ true ].
+
+			(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
+
+			"complete worklist"
+			(self sortedChildren: entity1)
+				with: (self sortedChildren: entity2)
+				do: [ :child1 :child2 |
+						worklist add: {
+								child1.
+								child2 } ] ].
+	^ true
 ]
 
 { #category : 'comparing' }
