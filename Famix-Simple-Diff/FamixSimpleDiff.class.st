@@ -96,15 +96,15 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 	"Will compare two models iteratively using the worklist algorithm"
 
-	| worklist visited roots1 roots2 |
-
+	| worklist visited |
 	"Initalization"
 	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
 	visited := IdentitySet new.
 
 	"doing tasks until the tasklist is empty"
 	[ worklist isEmpty ] whileFalse: [
-			(self processNextTaskFrom: worklist visited: visited) ifFalse: [^ self fail ] ].
+			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
+				^ self fail ] ].
 	^ true
 ]
 
