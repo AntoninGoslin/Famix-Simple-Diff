@@ -97,10 +97,6 @@ FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 	"Will compare two models iteratively using the worklist algorithm"
 
 	| worklist visited roots1 roots2 |
-	"we should have the same number of root"
-	roots1 := self entityRoots: aFamixModel.
-	roots2 := self entityRoots: aFamixModel2.
-	roots1 size = roots2 size ifFalse: [ ^ self fail ].
 
 	"Initalization"
 	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
@@ -287,7 +283,11 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 { #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
-	| rootEntity |
+	| theRoots rootEntity |
+	"checking non-existent index"
+	theRoots := self entityRoots: model.
+	(indexPath first between: 1 and: theRoots size) ifFalse: [ ^ nil ].
+
 	rootEntity := (self entityRoots: model) at: indexPath first.
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
 ]
