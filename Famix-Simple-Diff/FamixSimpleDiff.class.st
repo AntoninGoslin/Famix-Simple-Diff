@@ -55,41 +55,38 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: property [
-	"Comparing properties using Moose meta models"
+	"Compare property or relation using Moose meta models"
 
 	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
+	property type isPrimitive
+		ifTrue: [ "Properties"
+				| diff property1 property2 |
+				"filter derived properties"
+				(property isDerived or: [ property name beginsWith: 'numberOf' ])
+					ifTrue: [ ^ true ].
 
-	(property type isPrimitive and: [
-			 property isDerived not and: [
-				 (property name beginsWith: 'numberOf') not ] ]) ifTrue: [ "we read property values, and create a difference if they are not equals"
-			| diff property1 property2 |
-			property1 := property getRawFrom: aFamixEntity.
-			property2 := property getRawFrom: otherFamixEntity.
-			property1 = property2
-				ifFalse: [
-						diff := FamixSimpleDifference
-							        createPropertyChanged: property name
-							        entity: otherFamixEntity
-							        expectedValue: property1
-							        actualValue: property2.
-						self addDifference: diff.
-						^ false ]
-				ifTrue: [ ^ true ] ].
+				"comparing values"
+				property1 := property getRawFrom: aFamixEntity.
+				property2 := property getRawFrom: otherFamixEntity.
 
+				property1 = property2 ifTrue: [ ^ true ].
 
+				"We create a propety change differrences if our properties are not equals"
+				diff := FamixSimpleDifference
+					        createPropertyChanged: property name
+					        entity: otherFamixEntity
+					        expectedValue: property1
+					        actualValue: property2.
+				self addDifference: diff.
+				^ false ]
+		ifFalse: [ "relations""filter source anchors and multivalued relations"
+				(property name = 'sourceAnchor' or: [
+					 (self shouldCompareRelation: property) not ]) ifTrue: [ ^ true ].
 
-	"Comparing relations using Moose meta models"
-	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
-	(property type isPrimitive not and: [
-			 property name ~= 'sourceAnchor' and: [
-				 self shouldCompareRelation: property ] ]) ifTrue: [
-			^ self
-				  compareRelation: property
-				  from: aFamixEntity
-				  to: otherFamixEntity ].
-
-	"The property is not a property nor a relation..."
-	^ true
+				^ self
+					  compareRelation: property
+					  from: aFamixEntity
+					  to: otherFamixEntity ]
 ]
 
 { #category : 'comparing' }
