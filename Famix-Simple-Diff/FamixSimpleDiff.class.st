@@ -58,27 +58,8 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 	"Compare property or relation using Moose meta models"
 
 	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
-	property type isPrimitive
-		ifTrue: [ "Properties"
-				| diff property1 property2 |
-				"filter derived properties"
-				(property isDerived or: [ property name beginsWith: 'numberOf' ])
-					ifTrue: [ ^ true ].
-
-				"comparing values"
-				property1 := property getRawFrom: aFamixEntity.
-				property2 := property getRawFrom: otherFamixEntity.
-
-				property1 = property2 ifTrue: [ ^ true ].
-
-				"We create a propety change differrences if our properties are not equals"
-				diff := FamixSimpleDifference
-					        createPropertyChanged: property name
-					        entity: otherFamixEntity
-					        expectedValue: property1
-					        actualValue: property2.
-				self addDifference: diff.
-				^ false ]
+	^ property type isPrimitive
+		ifTrue: [ self comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity ]
 		ifFalse: [ "relations""filter source anchors and multivalued relations"
 				(property name = 'sourceAnchor' or: [
 					 (self shouldCompareRelation: property) not ]) ifTrue: [ ^ true ].
@@ -103,6 +84,31 @@ FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
 				^ self fail ] ].
 	^ differences isEmpty
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity [
+	"Is used for the properties comparisons"
+
+	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
+
+	| diff property1 property2 |
+	"filter derived properties"
+	(property isDerived or: [ property name beginsWith: 'numberOf' ]) ifTrue: [ ^ true ].
+
+	"comparing values"
+	property1 := property getRawFrom: aFamixEntity.
+	property2 := property getRawFrom: otherFamixEntity.
+	property1 = property2 ifTrue: [ ^ true ].
+
+	"We create a propety change differrences if our properties are not equals"
+	diff := FamixSimpleDifference
+		        createPropertyChanged: property name
+		        entity: otherFamixEntity
+		        expectedValue: property1
+		        actualValue: property2.
+	self addDifference: diff.
+	^ false
 ]
 
 { #category : 'comparing' }
