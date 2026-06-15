@@ -17,6 +17,7 @@ Class {
 
 { #category : 'utilities' }
 FamixSimpleDiffAutoTest class >> cacheModels [
+	"This cache is used to pre load models for the CI"
 
 	TestJavaModelBuilder loadMainModel.
 	TestJavaModelBuilder loadLibraryModel
