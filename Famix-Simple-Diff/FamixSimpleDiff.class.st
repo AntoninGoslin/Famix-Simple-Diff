@@ -430,7 +430,7 @@ FamixSimpleDiff >> shouldCompareRelation: aFM3Property [
 	. If we have a multivalued relation on a side, and a non multivalued relation on the other side, we keep the multivalued one.
 	. If both are multivalued, we check if one side is derived. In this case we keep the derived one."
 
-	"we want to skip derived relations without opposites"
+	"we want to skip derived relations without opposites" 
 
 	(aFM3Property isDerived and: [ aFM3Property hasOpposite not ]) ifTrue: [ ^ false ].
 
