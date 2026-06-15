@@ -60,14 +60,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: pr
 	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
 	^ property type isPrimitive
 		ifTrue: [ self comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity ]
-		ifFalse: [ "relations""filter source anchors and multivalued relations"
-				(property name = 'sourceAnchor' or: [
-					 (self shouldCompareRelation: property) not ]) ifTrue: [ ^ true ].
-
-				^ self
-					  compareRelation: property
-					  from: aFamixEntity
-					  to: otherFamixEntity ]
+		ifFalse: [ self compareRelationProperties: property from: aFamixEntity  to: otherFamixEntity ]
 ]
 
 { #category : 'comparing' }
@@ -94,7 +87,8 @@ FamixSimpleDiff >> comparePrimitiveProperties: property from: aFamixEntity to: o
 
 	| diff property1 property2 |
 	"filter derived properties"
-	(property isDerived or: [ property name beginsWith: 'numberOf' ]) ifTrue: [ ^ true ].
+	(property isDerived or: [ property name beginsWith: 'numberOf' ])
+		ifTrue: [ ^ true ].
 
 	"comparing values"
 	property1 := property getRawFrom: aFamixEntity.
@@ -150,6 +144,19 @@ FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: 
 				  compareToManyRelation: val1
 				  actual: val2
 				  target: otherFamixEntity ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareRelationProperties: property from: aFamixEntity to: otherFamixEntity [
+	"Is used for the relations comparisons"
+
+	(property name = 'sourceAnchor' or: [
+		 (self shouldCompareRelation: property) not ]) ifTrue: [ ^ true ].
+
+	^ self
+		  compareRelation: property
+		  from: aFamixEntity
+		  to: otherFamixEntity
 ]
 
 { #category : 'comparing' }
