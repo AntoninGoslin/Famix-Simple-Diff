@@ -1,77 +1,130 @@
+"
+This is a class that performs the comparison between two Famix models to detect differences (addition, deletion, changes).
+
+We traverse all the entities of the model and use the Moose meta-description to compare their types, properties, and relations.
+
+This class will create a list that gathers all the differences between the models.
+"
 Class {
 	#name : 'FamixSimpleDiff',
 	#superclass : 'Object',
 	#instVars : [
 		'roots',
 		'childrenCache',
-		'debug'
+		'debug',
+		'differences'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'accessing' }
+FamixSimpleDiff >> addDifference: aFamixDiff [
+	differences add: aFamixDiff
+]
+
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
-	| properties relations |
-	aFamixEntity class = otherFamixEntity class ifFalse: [ ^ self fail ].
+	| diff isEquals |
+	isEquals := true.
 
-	"Comparing properties (slots with non-famix values)"
-	properties := aFamixEntity class allSlots select: [ :slot |
-		              slot class = FMProperty ].
-	properties do: [ :p |
-			(p read: aFamixEntity) = (p read: otherFamixEntity) ifFalse: [
+	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
+	aFamixEntity class = otherFamixEntity class ifFalse: [
+			diff := FamixSimpleDifference
+				        createEntityChanged: otherFamixEntity
+				        expectedValue: aFamixEntity class name
+				        actualValue: otherFamixEntity class name.
+			self addDifference: diff.
+			^ self fail ].
+
+	aFamixEntity metadescription allPropertiesDo: [ :prop |
+			isEquals := isEquals
+			            &
+			            (self
+				             compareEntity: aFamixEntity
+				             to: otherFamixEntity
+				             property: prop) ].
+
+	"we stop the execution here if models are differents"
+	isEquals ifFalse: [ ^ self fail ].
+
+	"Every slot value are equal, the entities are identical"
+	^ true
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: property [
+	"Compare property or relation using Moose meta models"
+
+	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
+	^ property type isPrimitive
+		ifTrue: [ self comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity ]
+		ifFalse: [ self compareRelationProperties: property from: aFamixEntity  to: otherFamixEntity ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
+	"Will compare two models iteratively using the worklist algorithm"
+
+	| worklist visited |
+	"Initalization"
+	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
+	visited := IdentitySet new.
+
+	"doing tasks until the tasklist is empty"
+	[ worklist isEmpty ] whileFalse: [
+			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
 				^ self fail ] ].
-
-	"Comparing relations (slots with famix values)"
-	"We exclude source anchors because they are not relevant to model comparison"
-	relations := aFamixEntity class allSlots select: [ :slot |
-		             slot isFMRelationSlot and: [ slot name ~= 'sourceAnchor' ] ].
-	relations do: [ :r |
-			(self compareRelation: r from: aFamixEntity to: otherFamixEntity)
-				ifFalse: [ ^ self fail ] ].
-
-	"Every slot value is equal, the entities are identical"
-	^ true
+	^ differences isEmpty
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
+FamixSimpleDiff >> comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity [
+	"Is used for the properties comparisons"
 
-	(self entityRoots: aFamixJavaModel) do: [ :root |
-			| correspondingRoot |
-			correspondingRoot := self
-				                     correspondingEntityTo: root
-				                     in: aFamixJavaModel2.
-			(self recursiveCompareEntity: root with: correspondingRoot)
-				ifFalse: [ ^ self fail ] ].
+	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
 
-	^ true
+	| diff property1 property2 |
+	"filter derived properties"
+	(property isDerived or: [ property name beginsWith: 'numberOf' ])
+		ifTrue: [ ^ true ].
+
+	"comparing values"
+	property1 := property getRawFrom: aFamixEntity.
+	property2 := property getRawFrom: otherFamixEntity.
+	property1 = property2 ifTrue: [ ^ true ].
+
+	"We create a propety change differrences if our properties are not equals"
+	diff := FamixSimpleDifference
+		        createPropertyChanged: property name
+		        entity: otherFamixEntity
+		        expectedValue: property1
+		        actualValue: property2.
+	self addDifference: diff.
+	^ false
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: otherFamixEntity [
+FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: otherFamixEntity [
 
 	| val1 val2 sortBlock |
-	aFMRelationSlot isToOne
-		ifTrue: [
-				val1 := aFMRelationSlot read: aFamixEntity.
-				val2 := aFMRelationSlot read: otherFamixEntity ]
-		ifFalse: [
+	aRelationDescription isMultivalued
+		ifFalse: [ "toOne relation"
+				val1 := aRelationDescription getRawFrom: aFamixEntity.
+				val2 := aRelationDescription getRawFrom: otherFamixEntity ]
+		ifTrue: [ "toMany relation"
 				| rejectBlock |
-				val1 := (aFMRelationSlot read: aFamixEntity) asOrderedCollection.
-				val2 := (aFMRelationSlot read: otherFamixEntity)
+				val1 := (aRelationDescription getRawFrom: aFamixEntity)
+					        asOrderedCollection.
+				val2 := (aRelationDescription getRawFrom: otherFamixEntity)
 					        asOrderedCollection.
 
-				sortBlock := val1
-					             ifEmpty: [ self sortBlock ]
-					             ifNotEmpty: [ self sortBlockFor: val1 anyOne ].
-
 				rejectBlock := [ :e | e name = 'clone' ].
-
 				val1 := val1 reject: rejectBlock.
 				val2 := val2 reject: rejectBlock.
 
+				sortBlock := self sort.
 				val1 := val1 sorted: sortBlock.
 				val2 := val2 sorted: sortBlock ].
 
@@ -79,30 +132,113 @@ FamixSimpleDiff >> compareRelation: aFMRelationSlot from: aFamixEntity to: other
 	This guards for that..."
 	val1 == val2 ifTrue: [ ^ true ].
 
-	aFMRelationSlot isToOne
-		ifTrue: [ ^ (self pathesForMaybeMultiRelation: val1) = (self pathesForMaybeMultiRelation: val2) ]
-		ifFalse: [ "This is a toMany Relation! and the value should be a collection"
-				val1 size = val2 size ifFalse: [ ^ self fail ].
-				val1 := val1
-					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
-					        as: Bag.
-				val2 := val2
-					        flatCollect: [ :e | self pathesForMaybeMultiRelation: e ]
-					        as: Bag.
+	^ aRelationDescription isMultivalued
+		  ifFalse: [
+				  self
+					  compareToOneRelation: val1
+					  actual: val2
+					  target: otherFamixEntity
+					  relation: aRelationDescription ]
+		  ifTrue: [
+			  self
+				  compareToManyRelation: val1
+				  actual: val2
+				  target: otherFamixEntity ]
+]
 
-				val1 = val2
-					ifFalse: [ ^ self fail ]
-					ifTrue: [ ^ true ] ]
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareRelationProperties: property from: aFamixEntity to: otherFamixEntity [
+	"Is used for the relations comparisons"
+
+	(property name = 'sourceAnchor' or: [
+		 (self shouldCompareRelation: property) not ]) ifTrue: [ ^ true ].
+
+	^ self
+		  compareRelation: property
+		  from: aFamixEntity
+		  to: otherFamixEntity
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
+	"We use two pointer to browse the differences of the model using Moose name. val1 and val2 must be sorted collections.
+	- If the name are identical, we advance both pointers.
+	- If name1 < name2, so its a deletion (pointer1 go forward).
+	- If name1 > name2, so its an addition (pointer2 go forward).
+	If one stream is empty, we finish the remaining additions/ deletions.
+	Return true if models are equals, false otherwise.
+	"
+
+	| stream1 stream2 isEquals diff |
+	isEquals := true.
+
+	stream1 := val1 readStream.
+	stream2 := val2 readStream.
+
+	"looking the streams"
+	[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [
+			| element1 element2 name1 name2 |
+			
+			"setup name"
+			element1 := stream1 peek.
+			element2 := stream2 peek.
+
+			name1 := element1 mooseName.
+			name2 := element2 mooseName.
+
+			name1 = name2
+				ifTrue: ["move forward both ptr if identicals"
+						stream1 next.
+						stream2 next ]
+				ifFalse: [
+						name1 < name2
+							ifTrue: ["deletion case"
+									diff := FamixSimpleDifference
+										        createEntityDeletion: anEntity
+										        expectedValue: element1.
+									self addDifference: diff.
+									isEquals := false.
+									stream1 next "ptr1++" ]
+								
+							ifFalse: ["addition case"
+									diff := FamixSimpleDifference
+										        createEntityAdded: anEntity
+										        actualValue: element2.
+									self addDifference: diff.
+									isEquals := false.
+									stream2 next "ptr2++" ] ] ].
+
+	"cleaning end of pointers, checking if they have clean something"
+	"if they have deleted/added something, so the models are not equals"
+	(self finishRemainingDeletionOf: stream1 target: anEntity) ifTrue: [isEquals := false ].
+	(self finishRemainingAdditionOf: stream2 target: anEntity) ifTrue: [isEquals := false ].
+
+	^ isEquals
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity relation: aRelationDescription [
+
+	| areEquals diff |
+	"if we dont have the same relations, so it changed, we have to record it"
+	areEquals := (self pathesForMaybeMultiRelation: val1)
+	             = (self pathesForMaybeMultiRelation: val2).
+	areEquals ifFalse: [
+			diff := FamixSimpleDifference
+				        createRelationChanged: aRelationDescription name
+				        entity: anEntity
+				        expectedValue: val1
+				        actualValue: val2.
+			self addDifference: diff ].
+
+	^ areEquals
 ]
 
 { #category : 'path-computing' }
 FamixSimpleDiff >> computePathOfEntity: anEntity [
-	"We only work for single parent entities... And we hope this is the case always.
-	If not, talk to Guille, he has a point.
-	Read about lexical definition"
 
 	self assert: anEntity containers asSet size <= 1.
-	
+
 	"If we have a container, we continue recursively"
 	anEntity containers asSet do: [ :c |
 			^ (self pathOfEntity: c) copyWith:
@@ -118,13 +254,27 @@ FamixSimpleDiff >> correspondingEntityTo: entity in: model [
 	| path |
 	path := self pathOfEntity: entity.
 	^ self entityAtPath: path inModel: model
-	
 ]
 
 { #category : 'debug' }
 FamixSimpleDiff >> debugOn [
 
 	debug := true
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> differences [
+
+	^ differences
+]
+
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> enqueueRemainingTasksOf: entity1 and: entity2 into: worklist [
+
+	(self sortedChildren: entity1)
+		with: (self sortedChildren: entity2)
+		do: [ :child1 :child2 |
+				worklist add: { child1. child2 } ]
 ]
 
 { #category : 'path-computing' }
@@ -140,8 +290,11 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 { #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
-	| rootEntity |
-	
+	| theRoots rootEntity |
+	"checking non-existent index"
+	theRoots := self entityRoots: model.
+	(indexPath first between: 1 and: theRoots size) ifFalse: [ ^ nil ].
+
 	rootEntity := (self entityRoots: model) at: indexPath first.
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
 ]
@@ -149,7 +302,7 @@ FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 { #category : 'accessing' }
 FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 
-	| goodSortBlock excludedClasses |
+	| excludedClasses |
 	excludedClasses := {
 		                   FamixJavaWildcard.
 		                   FamixJavaAnnotationInstance.
@@ -162,8 +315,7 @@ FamixSimpleDiff >> entityRoots: aFamixJavaModel [
 				  rootEntities := aFamixJavaModel rootEntities reject: [ :entity |
 						                  entity name = '<Default Package>' or: [
 							                  excludedClasses includes: entity class ] ].
-				  goodSortBlock := self sortBlockFor: rootEntities anyOne.
-				  rootEntities sorted: goodSortBlock ]
+				  rootEntities sorted: self sort ]
 ]
 
 { #category : 'asserting' }
@@ -173,12 +325,55 @@ FamixSimpleDiff >> fail [
 	^ false
 ]
 
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
+
+	| modelsAreDifferents diff |
+	modelsAreDifferents := false.
+
+	[ aStream atEnd ] whileFalse: [
+			diff := aDifferenceCreation value: aStream next.
+			self addDifference: diff.
+			modelsAreDifferents := true ].
+
+	^ modelsAreDifferents 
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
+
+	^ self finishRemaining: aStream diffCreation: [ :val |
+		  FamixSimpleDifference createEntityAdded: anEntity actualValue: val ]
+]
+
+{ #category : 'accessing' }
+FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
+
+	^ self finishRemaining: aStream diffCreation: [ :val |
+			FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
+]
+
 { #category : 'initialization' }
 FamixSimpleDiff >> initialize [
-	
+
 	super initialize.
 	debug := false.
-	childrenCache := LRUCache new maximumWeight: 100
+	childrenCache := LRUCache new maximumWeight: 100.
+	differences := OrderedCollection new.
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> initializeWorklistFrom: aFamixJavaModel to: aFamixJavaModel2 [
+	"worklist initialisation"
+
+	| worklist |
+	worklist := OrderedCollection new.
+	(self entityRoots: aFamixJavaModel) do: [ :root |
+			| correspondingRoot |
+			correspondingRoot := self correspondingEntityTo: root in: aFamixJavaModel2.
+			worklist addLast: {root . correspondingRoot } ].
+		
+	^ worklist 
 ]
 
 { #category : 'path-computing' }
@@ -207,7 +402,48 @@ FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionO
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
+FamixSimpleDiff >> processNextTaskFrom: worklist visited: visited [
+
+	| currentTask entity1 entity2 |
+	currentTask := worklist removeFirst.
+	entity1 := currentTask first.
+	entity2 := currentTask second.
+
+	"new task case"
+	(visited includes: entity1) ifFalse: [
+			visited add: entity1.
+
+			"filter for strange cases"
+			(self shouldSkipComparisonEntity: entity1 with: entity2) ifTrue: [^ true ].
+
+			(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
+
+			"complete worklist"
+			self enqueueRemainingTasksOf: entity1 and: entity2 into: worklist ].
+	^ true
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> shouldCompareRelation: aFM3Property [
+	"We use this filter to avoid comparing the same relation. Here is the idea:
+	. A relation without opposite is important, so we keep it.
+	. If we have a multivalued relation on a side, and a non multivalued relation on the other side, we keep the multivalued one.
+	. If both are multivalued, we check if one side is derived. In this case we keep the derived one."
+
+	"we want to skip derived relations without opposites"
+
+	(aFM3Property isDerived and: [ aFM3Property hasOpposite not ]) ifTrue: [ ^ false ].
+
+	aFM3Property hasOpposite ifFalse: [ ^ true ].
+
+	^ aFM3Property isMultivalued ~= aFM3Property opposite isMultivalued
+		  ifTrue: [ aFM3Property isMultivalued ]
+		  ifFalse: [ aFM3Property isDerived ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> shouldSkipComparisonEntity: entity1 with: entity2 [
+	"Evaluates if an entities should be skiped due to edge case (parametric entities, anonymous classes, clone."
 
 	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
 	entity1 mooseName = entity2 mooseName ifTrue: [
@@ -218,58 +454,32 @@ FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
 
 	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
 	entity1 name = 'clone' ifTrue: [ ^ true ].
-
-	(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
-
-	(self sortedChildren: entity1)
-		with: (self sortedChildren: entity2)
-		do: [ :child1 :child2 |
-			(self recursiveCompareEntity: child1 with: child2) ifFalse: [
-				^ false ] ].
-
-	^ true
+	
+	^false
 ]
 
 { #category : 'sorting' }
-FamixSimpleDiff >> sortBlock [
+FamixSimpleDiff >> sort [
+	"We use mooseName to sort the entities.
+	If names are identical, we use sorceAnchor"
 
-	^ [ :a :b | a mooseName > b mooseName ]
-]
+	^ [ :a :b |
+		  | nameA nameB |
+		  nameA := a mooseName.
+		  nameB := b mooseName.
 
-{ #category : 'sorting' }
-FamixSimpleDiff >> sortBlockFor: anEntity [
-
-	^ anEntity hasUniqueMooseNameInModel
-		  ifTrue: [ [ :a :b | a mooseName < b mooseName ] ]
-		  ifFalse: [
-				  [ :a :b |
-					  | valA valB |
-					  valA := String streamContents: [ :s | a printOn: s ].
-					  valB := String streamContents: [ :s | b printOn: s ].
-					  valA < valB ] ]
+		  nameA = nameB
+			  ifTrue: [
+					  (a sourceAnchor notNil and: [ b sourceAnchor notNil ])
+						  ifTrue: [ a sourceAnchor endPos < b sourceAnchor endPos ] "sorting the source anchors"
+						  ifFalse: [ a sourceAnchor notNil ] ]
+			  ifFalse: [ nameA < nameB ] ] "alphabetical order sorting"
 ]
 
 { #category : 'sorting' }
 FamixSimpleDiff >> sortedChildren: entity [
 
-	| res |
-	res := childrenCache at: entity ifAbsentPut: [
-			       (entity containedEntities reject: [ :e |
-				        e isStub or: [ e name = '<Initializer>' ] ]) sorted: [ :a :b |
-					       | valA valB |
-					       valA := String streamContents: [ :s | a printOn: s ].
-					       valB := String streamContents: [ :s | b printOn: s ].
-					       valA = valB
-						       ifTrue: [
-								       a sourceAnchor
-									       ifNotNil: [
-											       b sourceAnchor
-												       ifNotNil: [ "case for two entities with identical printing string but different source anchor (several inner classes in the same parent for example)"
-													       a sourceAnchor endPos < b sourceAnchor endPos ]
-												       ifNil: [ valA < valB ] ]
-									       ifNil: [ valA < valB] ]
-						       ifFalse: [ valA < valB ] ] ].
-
-
-	^ res
+	^ childrenCache at: entity ifAbsentPut: [
+			  (entity containedEntities reject: [ :e |
+				   e isStub or: [ e name = '<Initializer>' ] ]) sorted: self sort ]
 ]

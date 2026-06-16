@@ -1,0 +1,12 @@
+SmalltalkCISpec {
+  #loading : [
+    SCIMetacelloLoadSpec {
+      #baseline : 'FamixSimpleDiff',
+      #directory : '',
+      #onConflict : #useIncoming
+    }
+  ],
+  #preTesting: SCICustomScript {
+    #path: '.github/scripts/preTesting.st'
+  }
+}
