@@ -446,10 +446,19 @@ FamixSimpleDiff >> processTimerDuring: aWorklistBlock [
 { #category : 'comparing' }
 FamixSimpleDiff >> processWorklist: worklist visited: visited [
 	"Process the worklist using a progress bar to show the comparison progress"
-	[ worklist isEmpty ] whileFalse: [
-			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
-				^ self fail ] ].
-	^ differences isEmpty
+
+	| timeCounter |
+	timeCounter := 0.
+
+	"start the timer and process the worklist"
+	^ self processTimerDuring: [ :timerTick |
+			  [ worklist isEmpty ] whileFalse: [
+					  (self processNextTaskFrom: worklist visited: visited) ifFalse: [^ self fail ].
+					  timeCounter := timeCounter + 1.
+
+					  "update tick"
+					  timeCounter \\ 1000 = 0 ifTrue: [ timerTick value ] ].
+			  differences isEmpty ]
 ]
 
 { #category : 'comparing' }
