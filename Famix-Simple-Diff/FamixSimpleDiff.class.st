@@ -430,6 +430,8 @@ FamixSimpleDiff >> processTimerDuring: aWorklistBlock [
 
 	^ [ :job |
 		  job title: 'Comparison of models : 0 s'.
+		  job min: 0.
+		  job max: 100.
 
 		  aWorklistBlock value: [
 				  | now |
@@ -438,8 +440,8 @@ FamixSimpleDiff >> processTimerDuring: aWorklistBlock [
 				  "update every seconds"
 				  now - update >= 1000 ifTrue: [
 						  update := now.
-						  job title:
-							  'Comparison of models : ' , (now - time // 1000) asString , ' s'.
+						  job title: 'Comparison of models : ' , (now - time // 1000) asString, ' s'.
+						  job currentValue: (((now - time) // 50)\\100). "loop every 5 seconds"
 						  World doOneCycleNow ] ] ] asJob run
 ]
 
