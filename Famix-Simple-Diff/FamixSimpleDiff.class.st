@@ -55,55 +55,54 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 { #category : 'comparing' }
 FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity property: property [
-	"Comparing properties using Moose meta models"
+	"Compare property or relation using Moose meta models"
 
 	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
-
-	(property type isPrimitive and: [
-			 property isDerived not and: [
-				 (property name beginsWith: 'numberOf') not ] ]) ifTrue: [ "we read property values, and create a difference if they are not equals"
-			| diff property1 property2 |
-			property1 := property getRawFrom: aFamixEntity.
-			property2 := property getRawFrom: otherFamixEntity.
-			property1 = property2
-				ifFalse: [
-						diff := FamixSimpleDifference
-							        createPropertyChanged: property name
-							        entity: otherFamixEntity
-							        expectedValue: property1
-							        actualValue: property2.
-						self addDifference: diff.
-						^ false ]
-				ifTrue: [ ^ true ] ].
-
-
-
-	"Comparing relations using Moose meta models"
-	"We focus on non primitive property (objects), and we exclude source anchors and derived property because they are not relevant to model comparison"
-	(property type isPrimitive not and: [
-			 property name ~= 'sourceAnchor' and: [
-				 self shouldCompareRelation: property ] ]) ifTrue: [
-			^ self
-				  compareRelation: property
-				  from: aFamixEntity
-				  to: otherFamixEntity ].
-
-	"The property is not a property nor a relation..."
-	^ true
+	^ property type isPrimitive
+		ifTrue: [ self comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity ]
+		ifFalse: [ self compareRelationProperties: property from: aFamixEntity  to: otherFamixEntity ]
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> compareModel: aFamixJavaModel to: aFamixJavaModel2 [
+FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
+	"Will compare two models iteratively using the worklist algorithm"
 
-	(self entityRoots: aFamixJavaModel) do: [ :root |
-			| correspondingRoot |
-			correspondingRoot := self
-				                     correspondingEntityTo: root
-				                     in: aFamixJavaModel2.
-			(self recursiveCompareEntity: root with: correspondingRoot)
-				ifFalse: [ ^ self fail ] ].
+	| worklist visited |
+	"Initalization"
+	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
+	visited := IdentitySet new.
 
-	^ true
+	"doing tasks until the tasklist is empty"
+	[ worklist isEmpty ] whileFalse: [
+			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
+				^ self fail ] ].
+	^ differences isEmpty
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> comparePrimitiveProperties: property from: aFamixEntity to: otherFamixEntity [
+	"Is used for the properties comparisons"
+
+	"We focus on entity with a primitive type (Boolean, Number, String). We exclude derived properties to not pollute difference list"
+
+	| diff property1 property2 |
+	"filter derived properties"
+	(property isDerived or: [ property name beginsWith: 'numberOf' ])
+		ifTrue: [ ^ true ].
+
+	"comparing values"
+	property1 := property getRawFrom: aFamixEntity.
+	property2 := property getRawFrom: otherFamixEntity.
+	property1 = property2 ifTrue: [ ^ true ].
+
+	"We create a propety change differrences if our properties are not equals"
+	diff := FamixSimpleDifference
+		        createPropertyChanged: property name
+		        entity: otherFamixEntity
+		        expectedValue: property1
+		        actualValue: property2.
+	self addDifference: diff.
+	^ false
 ]
 
 { #category : 'comparing' }
@@ -145,6 +144,19 @@ FamixSimpleDiff >> compareRelation: aRelationDescription from: aFamixEntity to: 
 				  compareToManyRelation: val1
 				  actual: val2
 				  target: otherFamixEntity ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> compareRelationProperties: property from: aFamixEntity to: otherFamixEntity [
+	"Is used for the relations comparisons"
+
+	(property name = 'sourceAnchor' or: [
+		 (self shouldCompareRelation: property) not ]) ifTrue: [ ^ true ].
+
+	^ self
+		  compareRelation: property
+		  from: aFamixEntity
+		  to: otherFamixEntity
 ]
 
 { #category : 'comparing' }
@@ -224,12 +236,9 @@ FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity rela
 
 { #category : 'path-computing' }
 FamixSimpleDiff >> computePathOfEntity: anEntity [
-	"We only work for single parent entities... And we hope this is the case always.
-	If not, talk to Guille, he has a point.
-	Read about lexical definition"
 
 	self assert: anEntity containers asSet size <= 1.
-	
+
 	"If we have a container, we continue recursively"
 	anEntity containers asSet do: [ :c |
 			^ (self pathOfEntity: c) copyWith:
@@ -259,6 +268,15 @@ FamixSimpleDiff >> differences [
 	^ differences
 ]
 
+{ #category : 'as yet unclassified' }
+FamixSimpleDiff >> enqueueRemainingTasksOf: entity1 and: entity2 into: worklist [
+
+	(self sortedChildren: entity1)
+		with: (self sortedChildren: entity2)
+		do: [ :child1 :child2 |
+				worklist add: { child1. child2 } ]
+]
+
 { #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 
@@ -272,7 +290,11 @@ FamixSimpleDiff >> entityAtPath: indexPath fromEntity: entity [
 { #category : 'path-computing' }
 FamixSimpleDiff >> entityAtPath: indexPath inModel: model [
 
-	| rootEntity |
+	| theRoots rootEntity |
+	"checking non-existent index"
+	theRoots := self entityRoots: model.
+	(indexPath first between: 1 and: theRoots size) ifFalse: [ ^ nil ].
+
 	rootEntity := (self entityRoots: model) at: indexPath first.
 	^ self entityAtPath: indexPath allButFirst fromEntity: rootEntity
 ]
@@ -340,6 +362,20 @@ FamixSimpleDiff >> initialize [
 	differences := OrderedCollection new.
 ]
 
+{ #category : 'comparing' }
+FamixSimpleDiff >> initializeWorklistFrom: aFamixJavaModel to: aFamixJavaModel2 [
+	"worklist initialisation"
+
+	| worklist |
+	worklist := OrderedCollection new.
+	(self entityRoots: aFamixJavaModel) do: [ :root |
+			| correspondingRoot |
+			correspondingRoot := self correspondingEntityTo: root in: aFamixJavaModel2.
+			worklist addLast: {root . correspondingRoot } ].
+		
+	^ worklist 
+]
+
 { #category : 'path-computing' }
 FamixSimpleDiff >> pathOfEntity: anEntity [
 
@@ -366,26 +402,24 @@ FamixSimpleDiff >> pathesForMaybeMultiRelation: multiRelationTargetOrCollectionO
 ]
 
 { #category : 'comparing' }
-FamixSimpleDiff >> recursiveCompareEntity: entity1 with: entity2 [
+FamixSimpleDiff >> processNextTaskFrom: worklist visited: visited [
 
-	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
-	entity1 mooseName = entity2 mooseName ifTrue: [
-			(entity1 isParametricEntity and: [ entity2 isParametricEntity ])
-				ifTrue: [ ^ true ].
-			(entity1 isType and: [ entity1 isAnonymousClass ]) ifTrue: [
-				^ true ] ].
+	| currentTask entity1 entity2 |
+	currentTask := worklist removeFirst.
+	entity1 := currentTask first.
+	entity2 := currentTask second.
 
-	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
-	entity1 name = 'clone' ifTrue: [ ^ true ].
+	"new task case"
+	(visited includes: entity1) ifFalse: [
+			visited add: entity1.
 
-	(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
+			"filter for strange cases"
+			(self shouldSkipComparisonEntity: entity1 with: entity2) ifTrue: [^ true ].
 
-	(self sortedChildren: entity1)
-		with: (self sortedChildren: entity2)
-		do: [ :child1 :child2 |
-			(self recursiveCompareEntity: child1 with: child2) ifFalse: [
-				^ false ] ].
+			(self compareEntity: entity1 to: entity2) ifFalse: [ ^ false ].
 
+			"complete worklist"
+			self enqueueRemainingTasksOf: entity1 and: entity2 into: worklist ].
 	^ true
 ]
 
@@ -396,14 +430,32 @@ FamixSimpleDiff >> shouldCompareRelation: aFM3Property [
 	. If we have a multivalued relation on a side, and a non multivalued relation on the other side, we keep the multivalued one.
 	. If both are multivalued, we check if one side is derived. In this case we keep the derived one."
 
-	| oppositeRelation |
+	"we want to skip derived relations without opposites"
+
+	(aFM3Property isDerived and: [ aFM3Property hasOpposite not ]) ifTrue: [ ^ false ].
+
 	aFM3Property hasOpposite ifFalse: [ ^ true ].
 
-	oppositeRelation := aFM3Property opposite.
-
-	^ aFM3Property isMultivalued ~= oppositeRelation isMultivalued
+	^ aFM3Property isMultivalued ~= aFM3Property opposite isMultivalued
 		  ifTrue: [ aFM3Property isMultivalued ]
 		  ifFalse: [ aFM3Property isDerived ]
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> shouldSkipComparisonEntity: entity1 with: entity2 [
+	"Evaluates if an entities should be skiped due to edge case (parametric entities, anonymous classes, clone."
+
+	"Parametric entities and inner classes are not used in the comparison process, so we return true by default"
+	entity1 mooseName = entity2 mooseName ifTrue: [
+			(entity1 isParametricEntity and: [ entity2 isParametricEntity ])
+				ifTrue: [ ^ true ].
+			(entity1 isType and: [ entity1 isAnonymousClass ]) ifTrue: [
+				^ true ] ].
+
+	"Clone methods have an issue (potentially due to JDT) which isn't easy to fix, so we skip those."
+	entity1 name = 'clone' ifTrue: [ ^ true ].
+	
+	^false
 ]
 
 { #category : 'sorting' }

@@ -15,6 +15,14 @@ Class {
 	#package : 'Famix-Simple-Diff-Tests'
 }
 
+{ #category : 'utilities' }
+FamixSimpleDiffAutoTest class >> cacheModels [
+	"This cache is used to pre load models for the CI"
+
+	TestJavaModelBuilder loadMainModel.
+	TestJavaModelBuilder loadLibraryModel
+]
+
 { #category : 'running' }
 FamixSimpleDiffAutoTest >> setUp [
 	super setUp.
