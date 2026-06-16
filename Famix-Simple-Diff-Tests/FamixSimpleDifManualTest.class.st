@@ -9,15 +9,6 @@ Class {
 	#package : 'Famix-Simple-Diff-Tests'
 }
 
-{ #category : 'running' }
-FamixSimpleDifManualTest >> setUp [
-	super setUp.
-
-	"fix here to limit window's performances problems"
-	self timeLimit: 30 seconds.
-	"Put here a common initialization logic for tests" 
-]
-
 { #category : 'tests' }
 FamixSimpleDifManualTest >> testClearRemainingAdditionWhenMultipleMethodHaveToBeCleaned [
 	| sd class1 class2 model1 model2 diff methodA1 methodA2 methodB methodC |
