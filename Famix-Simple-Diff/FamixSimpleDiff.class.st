@@ -73,10 +73,7 @@ FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 	visited := IdentitySet new.
 
 	"doing tasks until the tasklist is empty"
-	[ worklist isEmpty ] whileFalse: [
-			(self processNextTaskFrom: worklist visited: visited) ifFalse: [
-				^ self fail ] ].
-	^ differences isEmpty
+	^ self processWorklist: worklist visited: visited 
 ]
 
 { #category : 'comparing' }
@@ -421,6 +418,52 @@ FamixSimpleDiff >> processNextTaskFrom: worklist visited: visited [
 			"complete worklist"
 			self enqueueRemainingTasksOf: entity1 and: entity2 into: worklist ].
 	^ true
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> processTimerDuring: aWorklistBlock [
+	"Will update the timer of models comparison in a dedicated Job"
+
+	| time update |
+	time := Time millisecondClockValue.
+	update := time.
+
+	^ [ :job |
+		  job title: 'Comparison of models : 0 s'.
+		  job min: 0.
+		  job max: 100.
+
+		  aWorklistBlock value: [
+				  | now |
+				  now := Time millisecondClockValue.
+
+				  "update every seconds"
+				  now - update >= 1000 ifTrue: [
+						  update := now.
+						  job title: 'Comparison of models : ' , (now - time // 1000) asString , ' s'.
+						  job currentValue: ((now - time // 50) \\ 100).
+						
+						  "updating UI"
+						  UIManager default currentWorld ifNotNil: [ :world |
+							  world doOneCycleNow ] ] ] ] asJob run
+]
+
+{ #category : 'comparing' }
+FamixSimpleDiff >> processWorklist: worklist visited: visited [
+	"Process the worklist using a progress bar to show the comparison progress"
+
+	| timeCounter |
+	timeCounter := 0.
+
+	"start the timer and process the worklist"
+	^ self processTimerDuring: [ :timerTick |
+			  [ worklist isEmpty ] whileFalse: [
+					  (self processNextTaskFrom: worklist visited: visited) ifFalse: [^ self fail ].
+					  timeCounter := timeCounter + 1.
+
+					  "update tick"
+					  timeCounter \\ 1000 = 0 ifTrue: [ timerTick value ] ].
+			  differences isEmpty ]
 ]
 
 { #category : 'comparing' }
