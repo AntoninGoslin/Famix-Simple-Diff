@@ -126,7 +126,7 @@ FamixSimpleDifference >> printOn: aStream [
 	"entity"
 	aStream nextPutAll: 'On: '.
 	self entity 
-		ifNotNil: [ aStream nextPutAll: self entity mooseName asString ] 
+		ifNotNil: [ aStream nextPutAll: self entity name asString ] 
 		ifNil: [ aStream nextPutAll: 'Unknown' ].
 		
 	"Property"
