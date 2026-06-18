@@ -87,9 +87,9 @@ FamixSimpleDifferenceTest >> testNullValues [
 	| nullPattern |
 	nullPattern := FamixSimpleDifferenceNullValue new.
 	
-	self assert: nullPattern name equals: 'Nothing'. 
-	self assert: nullPattern mooseName equals: 'Nothing'.
-	self assert: nullPattern printString equals: 'Nothing'. 
+	self assert: nullPattern name equals: 'NullPatternObject'. 
+	self assert: nullPattern mooseName equals: 'NullPatternObject'.
+	self assert: nullPattern printString equals: 'NullPatternObject'. 
 ]
 
 { #category : 'accessing' }
@@ -100,7 +100,7 @@ FamixSimpleDifferenceTest >> testPrintOn [
 		                createEntityAdded: 'Entity'
 		                actualValue: 'Actual'.
 	output := additionDiff printString.
-	expectedString := 'a FamixSimpleDifferenceEntityAddition(''Entity Addition'' -> Expected: Nothing | Actual: ''Actual'' | On: ''Entity'')'.
+	expectedString := 'a FamixSimpleDifferenceEntityAddition(''Entity Addition'' -> Expected: NullPatternObject | Actual: ''Actual'' | On: ''Entity'')'.
 
 	"strings should be equals"
 	self assert: output equals: expectedString
