@@ -116,19 +116,19 @@ FamixSimpleDifference >> expectedValue: anObject [
 
 { #category : 'printing' }
 FamixSimpleDifference >> printOn: aStream [
-	"Will build a Stream like:a FamixSimpleDifferenceEntityAddition(Entity Addition -> Expected: Nothing | Actual: 'Actual' | On: Entity)"
+	"Will build a Stream like:a FSDEntityAddition(Expected: Nothing | Actual: 'Actual' | On: Entity)"
 	 
 	super printOn: aStream.
 	aStream nextPutAll: '('.
-	aStream print: self changeTypeName.
 	
 	self propertyName ifNotNil: [ 
 		aStream nextPutAll: '| Property Name: ';
-				  nextPutAll: self propertyName asString
+				  nextPutAll: self propertyName asString;
+				  nextPutAll: '| '.
 	].
 	
 	aStream 
-		nextPutAll: ' -> Expected: '; 
+		nextPutAll: 'Expected: '; 
 		print: expectedValue;
 		nextPutAll: ' | Actual: ';
 		print: actualValue.
