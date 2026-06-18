@@ -140,7 +140,12 @@ FamixSimpleDifference >> printOn: aStream [
 
 { #category : 'printing' }
 FamixSimpleDifference >> printValuesOn: aStream [
-    self subclassResponsibility
+	" By default we give the expected value and the actual value"
+
+	aStream nextPutAll: ' | Expected: '.
+	aStream print: self expectedValue.
+	aStream nextPutAll: ' | Actual: '.
+	aStream print: self actualValue
 ]
 
 { #category : 'accessing' }
