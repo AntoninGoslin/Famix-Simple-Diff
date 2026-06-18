@@ -5,13 +5,13 @@ The expected value is a NullValue (as the entity did not exist before).
 The actual value is the added entity.
 "
 Class {
-	#name : 'FamixSimpleDifferenceEntityAddition',
+	#name : 'FSDEntityAddition',
 	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FamixSimpleDifferenceEntityAddition >> changeTypeName [
+FSDEntityAddition >> changeTypeName [
 	^ 'Entity Addition'
 ]

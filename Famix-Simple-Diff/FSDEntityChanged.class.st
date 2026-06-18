@@ -5,13 +5,13 @@ The expected value is the entity from the original model.
 The actual value is the entity from the modified model.
 "
 Class {
-	#name : 'FamixSimpleDifferenceEntityChanged',
+	#name : 'FSDEntityChanged',
 	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FamixSimpleDifferenceEntityChanged >> changeTypeName [
+FSDEntityChanged >> changeTypeName [
 	^ 'Entity Changed'
 ]

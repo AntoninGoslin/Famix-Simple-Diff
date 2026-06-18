@@ -5,13 +5,13 @@ The expected value is the target entity or collection from the original model.
 The actual value is the new target entity or collection from the modified model.
 "
 Class {
-	#name : 'FamixSimpleDifferenceRelationChanged',
+	#name : 'FSDRelationChanged',
 	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FamixSimpleDifferenceRelationChanged >> changeTypeName [
+FSDRelationChanged >> changeTypeName [
 	^ 'Relation Changed'
 ]

@@ -23,7 +23,7 @@ Class {
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualValue [
 
-	^ FamixSimpleDifferenceEntityAddition new
+	^ FSDEntityAddition new
 		  entity: anEntity;
 		  expectedValue: FamixSimpleDifferenceNullValue new;
 		  actualValue: actualValue;
@@ -33,7 +33,7 @@ FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualVa
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [
 
-	^ FamixSimpleDifferenceEntityChanged new
+	^ FSDEntityChanged new
 		  entity: anEntity;
 		  expectedValue: expectedValue;
 		  actualValue: actualValue;
@@ -43,7 +43,7 @@ FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expe
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: expectedValue [
 
-	^ FamixSimpleDifferenceEntityDeletion new
+	^ FSDEntityDeletion new
 		  entity: anEntity;
 		  expectedValue: expectedValue;
 		  actualValue: FamixSimpleDifferenceNullValue new;
@@ -53,7 +53,7 @@ FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: exp
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createPropertyChanged: aPropertyName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
 
-	^ FamixSimpleDifferencePropertyChanged new
+	^ FSDPropertyChanged new
 		  propertyName: aPropertyName;
 		  entity: anEntity;
 		  expectedValue: expectedValue;
@@ -64,7 +64,7 @@ FamixSimpleDifference class >> createPropertyChanged: aPropertyName entity: anEn
 { #category : 'instance creation' }
 FamixSimpleDifference class >> createRelationChanged: aRelationName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
 
-	^ FamixSimpleDifferenceRelationChanged new
+	^ FSDRelationChanged new
 		  propertyName: aRelationName;
 		  entity: anEntity;
 		  expectedValue: expectedValue;

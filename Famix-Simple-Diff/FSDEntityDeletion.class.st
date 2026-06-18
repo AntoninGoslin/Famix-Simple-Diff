@@ -5,13 +5,13 @@ The expected value is the deleted entity.
 The actual value is a NullValue.
 "
 Class {
-	#name : 'FamixSimpleDifferenceEntityDeletion',
+	#name : 'FSDEntityDeletion',
 	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FamixSimpleDifferenceEntityDeletion >> changeTypeName [
+FSDEntityDeletion >> changeTypeName [
 	^ 'Entity Deletion'
 ]

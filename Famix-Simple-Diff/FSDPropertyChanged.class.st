@@ -5,13 +5,13 @@ The expected value is the property value from the original model.
 The actual value is the new property value from the modified model.
 "
 Class {
-	#name : 'FamixSimpleDifferencePropertyChanged',
+	#name : 'FSDPropertyChanged',
 	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FamixSimpleDifferencePropertyChanged >> changeTypeName [
+FSDPropertyChanged >> changeTypeName [
 	^ 'Property Changed'
 ]

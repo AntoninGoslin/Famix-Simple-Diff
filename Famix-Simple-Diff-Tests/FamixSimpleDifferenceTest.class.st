@@ -77,7 +77,7 @@ FamixSimpleDifferenceTest >> testInstanceCreation [
 						
 	"checking instance creation"
 	self assert: difference entity equals: 'testEntity'.
-	self assert: difference class equals: FamixSimpleDifferenceEntityChanged.
+	self assert: difference class equals: FSDEntityChanged.
 	self assert: difference expectedValue equals: expectedValue.
 	self assert: difference actualValue equals: actualValue.
 ]
@@ -100,7 +100,7 @@ FamixSimpleDifferenceTest >> testPrintOn [
 		                createEntityAdded: 'Entity'
 		                actualValue: 'Actual'.
 	output := additionDiff printString.
-	expectedString := 'a FamixSimpleDifferenceEntityAddition(''Entity Addition'' -> Expected: NullPatternObject | Actual: ''Actual'' | On: ''Entity'')'.
+	expectedString := 'a FSDEntityAddition(''Entity Addition'' -> Expected: NullPatternObject | Actual: ''Actual'' | On: ''Entity'')'.
 
 	"strings should be equals"
 	self assert: output equals: expectedString
@@ -117,7 +117,7 @@ FamixSimpleDifferenceTest >> testPrintOnWithPropertyName [
 		        actualValue: 'private'.
 
 	output := diff printString.
-	expectedString := 'a FamixSimpleDifferencePropertyChanged(''Property Changed''| Property Name: modifiers -> Expected: ''public'' | Actual: ''private'' | On: ''Entity'')'.
+	expectedString := 'a FSDPropertyChanged(''Property Changed''| Property Name: modifiers -> Expected: ''public'' | Actual: ''private'' | On: ''Entity'')'.
 
 	self assert: output equals: expectedString
 ]
