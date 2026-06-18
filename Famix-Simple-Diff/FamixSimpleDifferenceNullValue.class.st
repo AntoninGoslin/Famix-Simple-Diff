@@ -14,15 +14,15 @@ Class {
 
 { #category : 'accessing' }
 FamixSimpleDifferenceNullValue >> mooseName [
-	^ 'Nothing'
+	^ 'NullPatternObject'
 ]
 
 { #category : 'accessing' }
 FamixSimpleDifferenceNullValue >> name [
-	^ 'Nothing'
+	^ 'NullPatternObject'
 ]
 
 { #category : 'printing' }
 FamixSimpleDifferenceNullValue >> printOn: aStream [
-	aStream nextPutAll: 'Nothing' 
+	aStream nextPutAll: 'NullPatternObject' 
 ]
