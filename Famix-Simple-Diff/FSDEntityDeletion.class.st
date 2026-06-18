@@ -15,3 +15,9 @@ Class {
 FSDEntityDeletion >> changeTypeName [
 	^ 'Entity Deletion'
 ]
+
+{ #category : 'printing' }
+FSDEntityDeletion >> printValuesOn: aStream [
+    aStream nextPutAll: ' | Deleted: '.
+    aStream print: self expectedValue.
+]

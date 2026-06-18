@@ -15,3 +15,9 @@ Class {
 FSDEntityAddition >> changeTypeName [
 	^ 'Entity Addition'
 ]
+
+{ #category : 'printing' }
+FSDEntityAddition >> printValuesOn: aStream [
+    aStream nextPutAll: ' | Added: '.
+    aStream print: self actualValue.
+]

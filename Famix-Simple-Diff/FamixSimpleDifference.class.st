@@ -133,6 +133,14 @@ FamixSimpleDifference >> printOn: aStream [
 	self propertyName ifNotNil: [ 
 		aStream nextPutAll: ' | Property: '; nextPutAll: self propertyName asString.
 	].
+
+	"subclass responsibility"
+	self printValuesOn: aStream.
+]
+
+{ #category : 'printing' }
+FamixSimpleDifference >> printValuesOn: aStream [
+    self subclassResponsibility
 ]
 
 { #category : 'accessing' }
