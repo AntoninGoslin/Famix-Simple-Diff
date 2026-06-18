@@ -116,26 +116,23 @@ FamixSimpleDifference >> expectedValue: anObject [
 
 { #category : 'printing' }
 FamixSimpleDifference >> printOn: aStream [
-	"Will build a Stream like:a FSDEntityAddition(Expected: Nothing | Actual: 'Actual' | On: Entity)"
-	 
-	super printOn: aStream.
-	aStream nextPutAll: '('.
+	"Will build a string that represent our differences"
 	
+	"change name" 
+	aStream nextPutAll: '['; 
+	nextPutAll: self changeTypeName; 
+	nextPutAll: '] '.
+	
+	"entity"
+	aStream nextPutAll: 'On: '.
+	self entity 
+		ifNotNil: [ aStream nextPutAll: self entity mooseName asString ] 
+		ifNil: [ aStream nextPutAll: 'Unknown' ].
+		
+	"Property"
 	self propertyName ifNotNil: [ 
-		aStream nextPutAll: '| Property Name: ';
-				  nextPutAll: self propertyName asString;
-				  nextPutAll: '| '.
+		aStream nextPutAll: ' | Property: '; nextPutAll: self propertyName asString.
 	].
-	
-	aStream 
-		nextPutAll: 'Expected: '; 
-		print: expectedValue;
-		nextPutAll: ' | Actual: ';
-		print: actualValue.
-	
-	aStream nextPutAll: ' | On: '.
-	aStream print: entity.
-	aStream nextPutAll: ')'.
 ]
 
 { #category : 'accessing' }
