@@ -8,7 +8,7 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'accessing' }
 FSDPropertyRelatedChange >> changeTypeName [
 	^ 'Property Related Change'
 ]
