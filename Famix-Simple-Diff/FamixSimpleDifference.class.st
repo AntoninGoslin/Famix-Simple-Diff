@@ -128,8 +128,16 @@ FamixSimpleDifference >> printOn: aStream [
 		ifNotNil: [ aStream nextPutAll: self entity name asString ] 
 		ifNil: [ aStream nextPutAll: 'Unknown' ].
 		
+		
 	"subclass responsibility"
+	self printPropertyOn: aStream.
 	self printValuesOn: aStream.
+]
+
+{ #category : 'printing' }
+FamixSimpleDifference >> printPropertyOn: aStream [
+
+	"We don't have to print the properties in this class"
 ]
 
 { #category : 'printing' }

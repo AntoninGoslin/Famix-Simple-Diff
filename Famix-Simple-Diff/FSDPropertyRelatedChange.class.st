@@ -13,6 +13,14 @@ FSDPropertyRelatedChange >> changeTypeName [
 	^ 'Property Related Change'
 ]
 
+{ #category : 'printing' }
+FSDPropertyRelatedChange >> printPropertyOn: aStream [
+
+	aStream
+		nextPutAll: ' | Property: ';
+		nextPutAll: self propertyName asString
+]
+
 { #category : 'accessing' }
 FSDPropertyRelatedChange >> propertyName [
 
