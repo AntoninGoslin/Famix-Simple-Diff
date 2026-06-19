@@ -18,10 +18,14 @@ FamixSimpleDifferenceTest >> testChangeTypeNameEntityAddition [
 
 { #category : 'tests' }
 FamixSimpleDifferenceTest >> testChangeTypeNameEntityChanged [
+
 	| entityChanged |
-	entityChanged := FamixSimpleDifference createEntityChanged: 'Entity' expectedValue: 'Expected'  actualValue: 'Actual'.
-	
-	self assert: entityChanged changeTypeName equals: 'Entity Changed'.
+	entityChanged := FSDEntityChanged
+		                 createDifference: 'Entity'
+		                 expectedValue: 'Expected'
+		                 actualValue: 'Actual'.
+
+	self assert: entityChanged changeTypeName equals: 'Entity Changed'
 ]
 
 { #category : 'tests' }
@@ -69,11 +73,10 @@ FamixSimpleDifferenceTest >> testInstanceCreation [
 	"testing a code modification"
 	expectedValue := 'private int money;'.
 	actualValue := 'private int age;'.
-	
-	difference := FamixSimpleDifference 
-						createEntityChanged: 'testEntity' 
-						expectedValue: expectedValue 
-						actualValue: actualValue.
+	difference := FSDEntityChanged
+	              createDifference: 'testEntity'
+	              expectedValue: expectedValue
+	              actualValue: actualValue.
 						
 	"checking instance creation"
 	self assert: difference entity equals: 'testEntity'.

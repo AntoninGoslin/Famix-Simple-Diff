@@ -20,16 +20,6 @@ Class {
 }
 
 { #category : 'instance creation' }
-FamixSimpleDifference class >> createEntityChanged: anEntity expectedValue: expectedValue actualValue: actualValue [
-
-	^ FSDEntityChanged new
-		  entity: anEntity;
-		  expectedValue: expectedValue;
-		  actualValue: actualValue;
-		  yourself
-]
-
-{ #category : 'instance creation' }
 FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: expectedValue [
 
 	^ FSDEntityDeletion new

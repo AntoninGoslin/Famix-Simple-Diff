@@ -33,7 +33,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
 	aFamixEntity class = otherFamixEntity class ifFalse: [
 			diff := FSDEntityChanged
-				        createEntityChanged: otherFamixEntity
+				        createDifference: otherFamixEntity
 				        expectedValue: aFamixEntity class name
 				        actualValue: otherFamixEntity class name.
 			self addDifference: diff.
