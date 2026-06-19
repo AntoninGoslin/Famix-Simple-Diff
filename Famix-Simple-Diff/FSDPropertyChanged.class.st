@@ -11,6 +11,18 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'as yet unclassified' }
+FSDPropertyChanged class >> createDifference: aPropertyName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
+	"create a property change difference"
+
+	^ self new
+		  propertyName: aPropertyName;
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: actualValue;
+		  yourself
+]
+
 { #category : 'accessing' }
 FSDPropertyChanged >> changeTypeName [
 	^ 'Property Changed'

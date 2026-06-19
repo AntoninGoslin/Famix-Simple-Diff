@@ -19,28 +19,6 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'instance creation' }
-FamixSimpleDifference class >> createPropertyChanged: aPropertyName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
-
-	^ FSDPropertyChanged new
-		  propertyName: aPropertyName;
-		  entity: anEntity;
-		  expectedValue: expectedValue;
-		  actualValue: actualValue;
-		  yourself
-]
-
-{ #category : 'instance creation' }
-FamixSimpleDifference class >> createRelationChanged: aRelationName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
-
-	^ FSDRelationChanged new
-		  propertyName: aRelationName;
-		  entity: anEntity;
-		  expectedValue: expectedValue;
-		  actualValue: actualValue;
-		  yourself
-]
-
 { #category : 'accessing' }
 FamixSimpleDifference >> actualValue [
 

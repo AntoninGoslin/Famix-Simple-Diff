@@ -94,11 +94,12 @@ FamixSimpleDiff >> comparePrimitiveProperties: property from: aFamixEntity to: o
 	property1 = property2 ifTrue: [ ^ true ].
 
 	"We create a propety change differrences if our properties are not equals"
-	diff := FamixSimpleDifference
-		        createPropertyChanged: property name
-		        entity: otherFamixEntity
-		        expectedValue: property1
-		        actualValue: property2.
+	diff := FSDPropertyChanged
+	        createDifference: property name
+	        entity: otherFamixEntity
+	        expectedValue: property1
+	        actualValue: property2.
+	
 	self addDifference: diff.
 	^ false
 ]
@@ -224,8 +225,8 @@ FamixSimpleDiff >> compareToOneRelation: val1 actual: val2 target: anEntity rela
 	areEquals := (self pathesForMaybeMultiRelation: val1)
 	             = (self pathesForMaybeMultiRelation: val2).
 	areEquals ifFalse: [
-			diff := FamixSimpleDifference
-				        createRelationChanged: aRelationDescription name
+			diff := FSDRelationChanged
+				        createDifference: aRelationDescription name
 				        entity: anEntity
 				        expectedValue: val1
 				        actualValue: val2.

@@ -11,6 +11,18 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'as yet unclassified' }
+FSDRelationChanged class >> createDifference: aRelationName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
+	"create a relation change difference"
+
+	^ self new
+		  propertyName: aRelationName;
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: actualValue;
+		  yourself
+]
+
 { #category : 'accessing' }
 FSDRelationChanged >> changeTypeName [
 	^ 'Relation Changed'

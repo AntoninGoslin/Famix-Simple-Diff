@@ -43,12 +43,11 @@ FamixSimpleDifferenceTest >> testChangeTypeNameEntityDeletion [
 FamixSimpleDifferenceTest >> testChangeTypeNamePropertyChanged [
 
 	| propertyChanged |
-	propertyChanged := FamixSimpleDifference
-		                   createPropertyChanged: '#name'
+	propertyChanged := FSDPropertyChanged
+		                   createDifference: '#name'
 		                   entity: 'Entity'
 		                   expectedValue: 'Expected'
 		                   actualValue: 'Actual'.
-
 	self
 		assert: propertyChanged changeTypeName
 		equals: 'Property Changed'
@@ -58,8 +57,8 @@ FamixSimpleDifferenceTest >> testChangeTypeNamePropertyChanged [
 FamixSimpleDifferenceTest >> testChangeTypeNameRelationChanged [
 
 	| relationChanged |
-	relationChanged := FamixSimpleDifference
-		                   createRelationChanged: '#name'
+	relationChanged := FSDRelationChanged
+		                   createDifference: '#name'
 		                   entity: 'Entity'
 		                   expectedValue: 'Expected'
 		                   actualValue: 'Actual'.
@@ -117,12 +116,11 @@ FamixSimpleDifferenceTest >> testPrintOn [
 FamixSimpleDifferenceTest >> testPrintOnWithPropertyName [
 
 	| diff output expectedString |
-	diff := FamixSimpleDifference
-		        createPropertyChanged: 'modifiers'
-		        entity: Object
-		        expectedValue: 'public'
-		        actualValue: 'private'.
-
+	diff := FSDPropertyChanged
+	        createDifference: 'modifiers'
+	        entity: Object
+	        expectedValue: 'public'
+	        actualValue: 'private'.
 	output := diff printString.
 	expectedString := '[Property Changed] On: Object | Property: modifiers | Expected: ''public'' | Actual: ''private'''.
 
