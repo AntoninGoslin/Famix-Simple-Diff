@@ -85,7 +85,7 @@ FamixSimpleDifferenceTest >> testInstanceCreation [
 { #category : 'accessing' }
 FamixSimpleDifferenceTest >> testNullValues [
 	| nullPattern |
-	nullPattern := FamixSimpleDifferenceNullValue new.
+	nullPattern := FSDNullValue new.
 	
 	self assert: nullPattern name equals: 'NullPatternObject'. 
 	self assert: nullPattern mooseName equals: 'NullPatternObject'.

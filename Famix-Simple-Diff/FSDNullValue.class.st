@@ -6,23 +6,23 @@ This class is used when a difference does not have an expected or actual value (
 We use Null Pattern to avoid useless if cases.
 "
 Class {
-	#name : 'FamixSimpleDifferenceNullValue',
+	#name : 'FSDNullValue',
 	#superclass : 'Object',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FamixSimpleDifferenceNullValue >> mooseName [
+FSDNullValue >> mooseName [
 	^ 'NullPatternObject'
 ]
 
 { #category : 'accessing' }
-FamixSimpleDifferenceNullValue >> name [
+FSDNullValue >> name [
 	^ 'NullPatternObject'
 ]
 
 { #category : 'printing' }
-FamixSimpleDifferenceNullValue >> printOn: aStream [
+FSDNullValue >> printOn: aStream [
 	aStream nextPutAll: 'NullPatternObject' 
 ]

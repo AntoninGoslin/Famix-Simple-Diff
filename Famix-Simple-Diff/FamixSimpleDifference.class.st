@@ -25,7 +25,7 @@ FamixSimpleDifference class >> createEntityAdded: anEntity actualValue: actualVa
 
 	^ FSDEntityAddition new
 		  entity: anEntity;
-		  expectedValue: FamixSimpleDifferenceNullValue new;
+		  expectedValue: FSDNullValue new;
 		  actualValue: actualValue;
 		  yourself
 ]
@@ -46,7 +46,7 @@ FamixSimpleDifference class >> createEntityDeletion: anEntity expectedValue: exp
 	^ FSDEntityDeletion new
 		  entity: anEntity;
 		  expectedValue: expectedValue;
-		  actualValue: FamixSimpleDifferenceNullValue new;
+		  actualValue: FSDNullValue new;
 		  yourself
 ]
 
