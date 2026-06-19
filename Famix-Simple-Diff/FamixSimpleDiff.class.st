@@ -28,7 +28,8 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 
 	| diff isEquals |
 	isEquals := true.
-
+	differences ifNil: [ differences := OrderedCollection new ].
+	
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
 	aFamixEntity class = otherFamixEntity class ifFalse: [
 			diff := FamixSimpleDifference
@@ -69,7 +70,6 @@ FamixSimpleDiff >> compareModel: aFamixModel to: aFamixModel2 [
 
 	| worklist visited |
 	"Initalization"
-	differences := OrderedCollection new.
 	worklist := self initializeWorklistFrom: aFamixModel to: aFamixModel2.
 	visited := IdentitySet new.
 
