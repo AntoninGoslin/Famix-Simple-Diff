@@ -13,8 +13,7 @@ Class {
 	#instVars : [
 		'entity',
 		'expectedValue',
-		'actualValue',
-		'propertyName'
+		'actualValue'
 	],
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
@@ -129,11 +128,6 @@ FamixSimpleDifference >> printOn: aStream [
 		ifNotNil: [ aStream nextPutAll: self entity name asString ] 
 		ifNil: [ aStream nextPutAll: 'Unknown' ].
 		
-	"Property"
-	self propertyName ifNotNil: [ 
-		aStream nextPutAll: ' | Property: '; nextPutAll: self propertyName asString.
-	].
-
 	"subclass responsibility"
 	self printValuesOn: aStream.
 ]
@@ -146,16 +140,4 @@ FamixSimpleDifference >> printValuesOn: aStream [
 	aStream print: self expectedValue.
 	aStream nextPutAll: ' | Actual: '.
 	aStream print: self actualValue
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> propertyName [
-
-	^ propertyName
-]
-
-{ #category : 'accessing' }
-FamixSimpleDifference >> propertyName: anObject [
-
-	^ propertyName := anObject
 ]
