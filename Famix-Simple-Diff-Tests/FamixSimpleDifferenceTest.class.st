@@ -97,11 +97,11 @@ FamixSimpleDifferenceTest >> testPrintOn [
 
 	| additionDiff output expectedString |
 	additionDiff := FamixSimpleDifference
-		                createEntityAdded: 'Entity'
+		                createEntityAdded: Object 
 		                actualValue: 'Actual'.
 	output := additionDiff printString.
-	expectedString := 'a FSDEntityAddition(Expected: NullPatternObject | Actual: ''Actual'' | On: ''Entity'')'.
-
+	expectedString := '[Entity Addition] On: Object | Added: ''Actual'''.
+	
 	"strings should be equals"
 	self assert: output equals: expectedString
 ]
@@ -112,12 +112,12 @@ FamixSimpleDifferenceTest >> testPrintOnWithPropertyName [
 	| diff output expectedString |
 	diff := FamixSimpleDifference
 		        createPropertyChanged: 'modifiers'
-		        entity: 'Entity'
+		        entity: Object
 		        expectedValue: 'public'
 		        actualValue: 'private'.
 
 	output := diff printString.
-	expectedString := 'a FSDPropertyChanged(| Property Name: modifiers| Expected: ''public'' | Actual: ''private'' | On: ''Entity'')'.
+	expectedString := '[Property Changed] On: Object | Property: modifiers | Expected: ''public'' | Actual: ''private'''.
 
 	self assert: output equals: expectedString
 ]
