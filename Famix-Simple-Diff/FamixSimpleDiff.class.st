@@ -264,7 +264,7 @@ FamixSimpleDiff >> debugOn [
 FamixSimpleDiff >> differences [
 
 	^ differences ifNil: [
-		  self error: 'The comparison has not yet been created.' ]
+		  self error: ' Comparison not executed yet. Please compare two models before accessing to the differences.' ]
 ]
 
 { #category : 'as yet unclassified' }
