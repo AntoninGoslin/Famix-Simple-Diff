@@ -11,6 +11,16 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'as yet unclassified' }
+FSDEntityChanged class >> createDifference: anEntity expectedValue: expectedValue actualValue: actualValue [
+
+	^ self new
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: actualValue;
+		  yourself
+]
+
 { #category : 'accessing' }
 FSDEntityChanged >> changeTypeName [
 	^ 'Entity Changed'

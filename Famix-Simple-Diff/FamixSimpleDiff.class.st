@@ -32,7 +32,7 @@ FamixSimpleDiff >> compareEntity: aFamixEntity to: otherFamixEntity [
 	
 	"we compare the type of the entities. If we have not the same type, we add the difference in the list"
 	aFamixEntity class = otherFamixEntity class ifFalse: [
-			diff := FamixSimpleDifference
+			diff := FSDEntityChanged
 				        createEntityChanged: otherFamixEntity
 				        expectedValue: aFamixEntity class name
 				        actualValue: otherFamixEntity class name.
@@ -176,7 +176,6 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 	"looking the streams"
 	[ stream1 atEnd or: [ stream2 atEnd ] ] whileFalse: [
 			| element1 element2 name1 name2 |
-			
 			"setup name"
 			element1 := stream1 peek.
 			element2 := stream2 peek.
@@ -185,31 +184,33 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 			name2 := element2 mooseName.
 
 			name1 = name2
-				ifTrue: ["move forward both ptr if identicals"
+				ifTrue: [ "move forward both ptr if identicals"
 						stream1 next.
 						stream2 next ]
 				ifFalse: [
 						name1 < name2
-							ifTrue: ["deletion case"
+							ifTrue: [ "deletion case"
 									diff := FamixSimpleDifference
 										        createEntityDeletion: anEntity
 										        expectedValue: element1.
 									self addDifference: diff.
 									isEquals := false.
 									stream1 next "ptr1++" ]
-								
-							ifFalse: ["addition case"
-									diff := FamixSimpleDifference
-										        createEntityAdded: anEntity
+							ifFalse: [ "addition case"
+									diff := FSDEntityAddition
+										        createDifference: anEntity
 										        actualValue: element2.
+
 									self addDifference: diff.
 									isEquals := false.
 									stream2 next "ptr2++" ] ] ].
 
 	"cleaning end of pointers, checking if they have clean something"
 	"if they have deleted/added something, so the models are not equals"
-	(self finishRemainingDeletionOf: stream1 target: anEntity) ifTrue: [isEquals := false ].
-	(self finishRemainingAdditionOf: stream2 target: anEntity) ifTrue: [isEquals := false ].
+	(self finishRemainingDeletionOf: stream1 target: anEntity) ifTrue: [
+		isEquals := false ].
+	(self finishRemainingAdditionOf: stream2 target: anEntity) ifTrue: [
+		isEquals := false ].
 
 	^ isEquals
 ]
@@ -342,7 +343,7 @@ FamixSimpleDiff >> finishRemaining: aStream diffCreation: aDifferenceCreation [
 FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 
 	^ self finishRemaining: aStream diffCreation: [ :val |
-		  FamixSimpleDifference createEntityAdded: anEntity actualValue: val ]
+		  FSDEntityAddition createDifference: anEntity actualValue: val ]
 ]
 
 { #category : 'accessing' }

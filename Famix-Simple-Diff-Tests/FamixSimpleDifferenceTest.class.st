@@ -11,7 +11,7 @@ Class {
 { #category : 'tests' }
 FamixSimpleDifferenceTest >> testChangeTypeNameEntityAddition [
 	| entityAddition |
-	entityAddition := FamixSimpleDifference createEntityAdded: 'Entity' actualValue: 'Actual'.
+	entityAddition := FSDEntityAddition createDifference: 'Entity' actualValue: 'Actual'.
 	
 	self assert: entityAddition changeTypeName equals: 'Entity Addition'.
 ]
@@ -96,12 +96,13 @@ FamixSimpleDifferenceTest >> testNullValues [
 FamixSimpleDifferenceTest >> testPrintOn [
 
 	| additionDiff output expectedString |
-	additionDiff := FamixSimpleDifference
-		                createEntityAdded: Object 
+	additionDiff := FSDEntityAddition
+		                createDifference: Object
 		                actualValue: 'Actual'.
+
 	output := additionDiff printString.
 	expectedString := '[Entity Addition] On: Object | Added: ''Actual'''.
-	
+
 	"strings should be equals"
 	self assert: output equals: expectedString
 ]
