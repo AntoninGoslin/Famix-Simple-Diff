@@ -356,7 +356,6 @@ FamixSimpleDiff >> initialize [
 	super initialize.
 	debug := false.
 	childrenCache := LRUCache new maximumWeight: 100.
-	differences := OrderedCollection new.
 ]
 
 { #category : 'comparing' }
