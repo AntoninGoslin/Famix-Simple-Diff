@@ -6,7 +6,7 @@ The actual value is the new target entity or collection from the modified model.
 "
 Class {
 	#name : 'FSDRelationChanged',
-	#superclass : 'FamixSimpleDifference',
+	#superclass : 'FSDPropertyRelatedChange',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }

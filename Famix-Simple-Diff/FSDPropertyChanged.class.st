@@ -6,7 +6,7 @@ The actual value is the new property value from the modified model.
 "
 Class {
 	#name : 'FSDPropertyChanged',
-	#superclass : 'FamixSimpleDifference',
+	#superclass : 'FSDPropertyRelatedChange',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }

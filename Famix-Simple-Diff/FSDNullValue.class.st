@@ -7,7 +7,7 @@ We use Null Pattern to avoid useless if cases.
 "
 Class {
 	#name : 'FSDNullValue',
-	#superclass : 'Object',
+	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
