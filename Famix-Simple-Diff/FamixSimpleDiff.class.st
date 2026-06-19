@@ -190,9 +190,10 @@ FamixSimpleDiff >> compareToManyRelation: val1 actual: val2 target: anEntity [
 				ifFalse: [
 						name1 < name2
 							ifTrue: [ "deletion case"
-									diff := FamixSimpleDifference
-										        createEntityDeletion: anEntity
-										        expectedValue: element1.
+									diff := FSDEntityDeletion
+							        createDifference: anEntity
+							        expectedValue: element1.
+									
 									self addDifference: diff.
 									isEquals := false.
 									stream1 next "ptr1++" ]
@@ -350,7 +351,7 @@ FamixSimpleDiff >> finishRemainingAdditionOf: aStream target: anEntity [
 FamixSimpleDiff >> finishRemainingDeletionOf: aStream target: anEntity [
 
 	^ self finishRemaining: aStream diffCreation: [ :val |
-			FamixSimpleDifference createEntityDeletion: anEntity expectedValue: val ]
+		  FSDEntityDeletion createDifference: anEntity expectedValue: val ]
 ]
 
 { #category : 'initialization' }

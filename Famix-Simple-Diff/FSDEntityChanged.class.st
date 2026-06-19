@@ -13,6 +13,7 @@ Class {
 
 { #category : 'as yet unclassified' }
 FSDEntityChanged class >> createDifference: anEntity expectedValue: expectedValue actualValue: actualValue [
+	"create an entity change difference"
 
 	^ self new
 		  entity: anEntity;

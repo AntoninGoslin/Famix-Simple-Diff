@@ -11,6 +11,17 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
+{ #category : 'as yet unclassified' }
+FSDEntityDeletion class >> createDifference: anEntity expectedValue: expectedValue [
+	"create a deletion difference"
+
+	^ self new
+		  entity: anEntity;
+		  expectedValue: expectedValue;
+		  actualValue: FSDNullValue new;
+		  yourself
+]
+
 { #category : 'accessing' }
 FSDEntityDeletion >> changeTypeName [
 	^ 'Entity Deletion'
