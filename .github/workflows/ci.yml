@@ -6,8 +6,6 @@ on:
       - main
       - differences-list
       - differences-list-with-meta-model
-      - simplify_entity_comparison_using_meta_description
-      - adding_test_package
 
   pull_request:
     branches:
