@@ -270,7 +270,7 @@ FamixSimpleDiff >> differences [
 		  self error: ' Comparison not executed yet. Please compare two models before accessing to the differences.' ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'comparing' }
 FamixSimpleDiff >> enqueueRemainingTasksOf: entity1 and: entity2 into: worklist [
 
 	(self sortedChildren: entity1)
