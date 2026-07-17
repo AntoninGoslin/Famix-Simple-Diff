@@ -66,9 +66,7 @@ FamixSimpleDifference >> printOn: aStream [
 	"Will build a string that represent our differences"
 
 	aStream
-		nextPutAll: '[';
-		nextPutAll: self changeTypeName;
-		nextPutAll: '] '.
+		nextPutAll: '['; nextPutAll: self changeTypeName; nextPutAll: '] '.
 
 	"entity"
 	aStream nextPutAll: 'On: '.
