@@ -64,22 +64,22 @@ FamixSimpleDifference >> expectedValue: anObject [
 { #category : 'printing' }
 FamixSimpleDifference >> printOn: aStream [
 	"Will build a string that represent our differences"
-	
-	"change name" 
-	aStream nextPutAll: '['; 
-	nextPutAll: self changeTypeName; 
-	nextPutAll: '] '.
-	
+
+	aStream
+		nextPutAll: '[';
+		nextPutAll: self changeTypeName;
+		nextPutAll: '] '.
+
 	"entity"
 	aStream nextPutAll: 'On: '.
-	self entity 
-		ifNotNil: [ aStream nextPutAll: self entity name asString ] 
+	self entity
+		ifNotNil: [ aStream nextPutAll: self entity name asString ]
 		ifNil: [ aStream nextPutAll: 'Unknown' ].
-		
-		
+
+
 	"subclass responsibility"
 	self printPropertyOn: aStream.
-	self printValuesOn: aStream.
+	self printValuesOn: aStream
 ]
 
 { #category : 'printing' }
