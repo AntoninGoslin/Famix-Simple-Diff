@@ -6,23 +6,23 @@ This class is used when a difference does not have an expected or actual value (
 We use Null Pattern to avoid useless if cases, and to represent our entities that are missing between models.
 "
 Class {
-	#name : 'FSDNullValue',
+	#name : 'FSDMissingEntity',
 	#superclass : 'FamixSimpleDifference',
 	#category : 'Famix-Simple-Diff',
 	#package : 'Famix-Simple-Diff'
 }
 
 { #category : 'accessing' }
-FSDNullValue >> mooseName [
-	^ 'NullPatternObject'
+FSDMissingEntity >> mooseName [
+	^ 'Missing Entity'
 ]
 
 { #category : 'accessing' }
-FSDNullValue >> name [
-	^ 'NullPatternObject'
+FSDMissingEntity >> name [
+	^ 'Missing Entity'
 ]
 
 { #category : 'printing' }
-FSDNullValue >> printOn: aStream [
-	aStream nextPutAll: 'NullPatternObject' 
+FSDMissingEntity >> printOn: aStream [
+	aStream nextPutAll: 'Missing Entity' 
 ]

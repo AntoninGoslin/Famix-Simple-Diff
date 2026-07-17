@@ -17,7 +17,7 @@ FSDEntityAddition class >> createDifference: anEntity actualValue: actualValue [
 
 	^ self new
 		  entity: anEntity;
-		  expectedValue: FSDNullValue new;
+		  expectedValue: FSDMissingEntity new;
 		  actualValue: actualValue;
 		  yourself
 ]

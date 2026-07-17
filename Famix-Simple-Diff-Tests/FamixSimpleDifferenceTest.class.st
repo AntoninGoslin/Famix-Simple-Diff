@@ -90,11 +90,11 @@ FamixSimpleDifferenceTest >> testInstanceCreation [
 { #category : 'accessing' }
 FamixSimpleDifferenceTest >> testNullValues [
 	| nullPattern |
-	nullPattern := FSDNullValue new.
+	nullPattern := FSDMissingEntity new.
 	
-	self assert: nullPattern name equals: 'NullPatternObject'. 
-	self assert: nullPattern mooseName equals: 'NullPatternObject'.
-	self assert: nullPattern printString equals: 'NullPatternObject'. 
+	self assert: nullPattern name equals: 'Missing Entity'. 
+	self assert: nullPattern mooseName equals: 'Missing Entity'.
+	self assert: nullPattern printString equals: 'Missing Entity'. 
 ]
 
 { #category : 'accessing' }

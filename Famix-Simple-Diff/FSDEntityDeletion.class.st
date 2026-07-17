@@ -18,7 +18,7 @@ FSDEntityDeletion class >> createDifference: anEntity expectedValue: expectedVal
 	^ self new
 		  entity: anEntity;
 		  expectedValue: expectedValue;
-		  actualValue: FSDNullValue new;
+		  actualValue: FSDMissingEntity new;
 		  yourself
 ]
 
