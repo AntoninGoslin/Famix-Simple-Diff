@@ -11,7 +11,7 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'instance creation' }
 FSDEntityAddition class >> createDifference: anEntity actualValue: actualValue [
 	"create an addition"
 

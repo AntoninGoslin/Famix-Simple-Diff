@@ -11,7 +11,7 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'instance creation' }
 FSDPropertyChanged class >> createDifference: aPropertyName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
 	"create a property change difference"
 

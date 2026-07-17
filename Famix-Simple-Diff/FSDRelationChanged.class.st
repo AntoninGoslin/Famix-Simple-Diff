@@ -11,7 +11,7 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'instance creation' }
 FSDRelationChanged class >> createDifference: aRelationName entity: anEntity expectedValue: expectedValue actualValue: actualValue [
 	"create a relation change difference"
 

@@ -11,7 +11,7 @@ Class {
 	#package : 'Famix-Simple-Diff'
 }
 
-{ #category : 'as yet unclassified' }
+{ #category : 'instance creation' }
 FSDEntityChanged class >> createDifference: anEntity expectedValue: expectedValue actualValue: actualValue [
 	"create an entity change difference"
 
